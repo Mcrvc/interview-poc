@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Profile · Akagikay</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/data.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body data-page="profile">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <nav class="header-inner" aria-label="Main navigation">
+    <a class="brand header-brand" href="dashboard.html">
+      <span class="brand-icon"><img src="assets/logo.svg" alt="" aria-hidden="true"></span>
+      <span class="brand-text">Akagikay</span>
+    </a>
+    <div class="header-nav">
+      <a class="nav-link" href="dashboard.html" data-nav="dashboard">Dashboard</a>
+      <a class="nav-link" href="storage.html" data-nav="storage">Your interview</a>
+      <a class="nav-link" href="system-feedback.html" data-nav="feedback">System feedback</a>
+    </div>
+    <div class="header-right">
+      <a class="profile-link is-active" href="profile.html" aria-label="Profile" title="Profile" data-nav="profile">
+        <img class="header-avatar" src="assets/avatar.svg" alt="">
+        <span class="profile-name" data-username>Eric Arthur Blair</span>
+      </a>
+    </div>
+  </nav>
+</header>
+<main id="main" class="page narrow-page profile-page-layout">
+  <!-- SECTION 1: ACCOUNT & PASSWORD -->
+  <section class="panel profile-panel">
+    <div class="profile-summary">
+      <div class="profile-avatar-wrapper">
+        <img class="profile-avatar" src="assets/avatar.svg" alt="">
+      </div>
+      <h2 data-username>Eric Arthur Blair</h2>
+    </div>
+
+    <form id="profile-form" action="#">
+      <div class="field">
+        <label for="profile-username">Username</label>
+        <input id="profile-username" type="text" value="Eric Arthur Blair" required maxlength="60" autocomplete="off" placeholder="Your username">
+      </div>
+
+      <!-- Password Field Group -->
+      <div class="field">
+        <label for="account-password">Password</label>
+        <input id="account-password" type="password" value="123" readonly required autocomplete="off" placeholder="Password">
+      </div>
+
+      <!-- Password Unlock Box -->
+      <div class="password-unlock-box" id="password-unlock-box">
+        <label for="verify-password" class="unlock-label">Verify current password to view & edit</label>
+        <div class="unlock-input-group">
+          <input id="verify-password" type="password" placeholder="Enter current password" autocomplete="off">
+          <button class="btn btn-secondary" id="unlock-password-btn" type="button">Unlock</button>
+        </div>
+      </div>
+
+      <p class="form-status" id="profile-status" role="status"></p>
+      <p class="form-error" id="profile-error" hidden role="alert"></p>
+
+      <div class="actions">
+        <button class="btn" id="save-profile" type="submit">Save</button>
+        <a class="btn btn-quiet" href="sign-in.html" data-sign-out>Sign out</a>
+      </div>
+    </form>
+  </section>
+
+  <!-- SECTION 2: YOUR CV SECTION -->
+  <section id="your-cv" class="panel profile-cv-panel">
+    <div class="profile-cv-header">
+      <h2>Your CV</h2>
+    </div>
+
+    <!-- 4 STRUCTURED CV SECTIONS -->
+    <div class="profile-cv-stack">
+      <!-- Section 1 -->
+      <div class="cv-section-card">
+        <div class="cv-section-meta">
+          <span class="cv-section-num">01</span>
+          <div class="cv-section-title-wrap">
+            <label for="prof-cv-0" class="cv-section-title">Personal Profile</label>
+            <span class="cv-section-hint">Summary of professional identity, core mindset & career focus</span>
+          </div>
+        </div>
+        <div class="cv-section-content">
+          <textarea id="prof-cv-0" data-cv="0" rows="3" maxlength="6000" placeholder="Describe your background and professional positioning..."></textarea>
+        </div>
+      </div>
+
+      <!-- Section 2 -->
+      <div class="cv-section-card">
+        <div class="cv-section-meta">
+          <span class="cv-section-num">02</span>
+          <div class="cv-section-title-wrap">
+            <label for="prof-cv-1" class="cv-section-title">Education History</label>
+            <span class="cv-section-hint">Degrees, institutions, honors, and notable coursework</span>
+          </div>
+        </div>
+        <div class="cv-section-content">
+          <textarea id="prof-cv-1" data-cv="1" rows="3" maxlength="6000" placeholder="List your education, degrees, and academic achievements..."></textarea>
+        </div>
+      </div>
+
+      <!-- Section 3 -->
+      <div class="cv-section-card">
+        <div class="cv-section-meta">
+          <span class="cv-section-num">03</span>
+          <div class="cv-section-title-wrap">
+            <label for="prof-cv-2" class="cv-section-title">Work & Research Experience</label>
+            <span class="cv-section-hint">Past roles, key responsibilities, and quantified achievements</span>
+          </div>
+        </div>
+        <div class="cv-section-content">
+          <textarea id="prof-cv-2" data-cv="2" rows="4" maxlength="6000" placeholder="Highlight your work history and project outcomes..."></textarea>
+        </div>
+      </div>
+
+      <!-- Section 4 -->
+      <div class="cv-section-card">
+        <div class="cv-section-meta">
+          <span class="cv-section-num">04</span>
+          <div class="cv-section-title-wrap">
+            <label for="prof-cv-3" class="cv-section-title">Core Skills</label>
+            <span class="cv-section-hint">Technical proficiencies, industry tools, and interpersonal strengths</span>
+          </div>
+        </div>
+        <div class="cv-section-content">
+          <textarea id="prof-cv-3" data-cv="3" rows="3" maxlength="6000" placeholder="List your technical, tactical, and leadership skills..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- OR DIVIDER -->
+    <div class="cv-or-divider">
+      <span>OR you can upload your CV</span>
+    </div>
+
+    <!-- PDF UPLOAD ZONE -->
+    <div class="cv-pdf-dropzone" id="cv-pdf-dropzone" tabindex="0" role="button" aria-label="Upload PDF resume">
+      <input type="file" id="cv-pdf-file-input" accept=".pdf,application/pdf" class="visually-hidden">
+      <div class="dropzone-icon" aria-hidden="true">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <path d="M12 18v-6"></path>
+          <path d="M9 15l3-3 3 3"></path>
+        </svg>
+      </div>
+      <h3>Upload your PDF Resume</h3>
+      <p class="dropzone-text">Drag and drop your file here, or <button type="button" class="btn-text-action" id="browse-pdf-btn">browse from computer</button></p>
+      <span class="dropzone-hint">Supports PDF only (up to 10MB)</span>
+    </div>
+
+    <!-- Uploaded PDF Card (shown when a PDF is attached) -->
+    <div class="cv-pdf-card is-hidden" id="cv-pdf-card">
+      <div class="pdf-card-file">
+        <div class="pdf-icon-badge" aria-hidden="true">PDF</div>
+        <div class="pdf-file-details">
+          <div class="pdf-file-name" id="pdf-file-name">Eric_Arthur_Blair_CV.pdf</div>
+          <div class="pdf-file-meta">
+            <span id="pdf-file-size">420 KB</span>
+            <span class="meta-dot">•</span>
+            <span id="pdf-file-date">Attached to profile</span>
+          </div>
+        </div>
+      </div>
+      <div class="pdf-card-actions">
+        <button class="btn btn-secondary btn-sm" id="replace-pdf-btn" type="button">Replace</button>
+        <button class="btn btn-quiet btn-sm text-danger" id="remove-pdf-btn" type="button">Remove</button>
+      </div>
+    </div>
+
+    <p class="form-status" id="pdf-status" role="status"></p>
+    <p class="form-error" id="pdf-error" hidden role="alert"></p>
+
+    <div class="cv-actions-bar">
+      <p class="form-status" id="cv-status" role="status"></p>
+      <button class="btn" id="save-cv-btn" type="button">Save CV</button>
+    </div>
+  </section>
+</main>
+<footer class="site-footer"><span>Akagikay · Interview AI Assistant</span></footer>
+<noscript><p class="noscript">Enable JavaScript to save your demo answers and use the forms.</p></noscript>
+</body>
+</html>

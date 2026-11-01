@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Job Profile · Akagikay</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/data.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body data-page="job-profile">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <nav class="header-inner" aria-label="Main navigation">
+    <a class="brand header-brand" href="dashboard.html">
+      <span class="brand-icon"><img src="assets/logo.svg" alt="" aria-hidden="true"></span>
+      <span class="brand-text">Akagikay</span>
+    </a>
+    <div class="header-nav">
+      <a class="nav-link" href="dashboard.html" data-nav="dashboard">Dashboard</a>
+      <a class="nav-link" href="storage.html" data-nav="storage">Your interview</a>
+      <a class="nav-link" href="system-feedback.html" data-nav="feedback">System feedback</a>
+    </div>
+    <div class="header-right">
+      <a class="profile-link" href="profile.html" aria-label="Profile" title="Profile" data-nav="profile">
+        <img class="header-avatar" src="assets/avatar.svg" alt="">
+        <span class="profile-name" data-username>Eric Arthur Blair</span>
+      </a>
+    </div>
+  </nav>
+</header>
+<main id="main" class="page form-page">
+  <form class="panel" id="job-form" action="interview.html">
+    <div class="panel-header">
+      <h2>Job Profile</h2>
+    </div>
+
+    <div class="form-grid">
+      <div class="field"><label for="job-title">Job title</label><input id="job-title" type="text" placeholder="Enter job title" maxlength="180" required data-job></div>
+      <div class="field"><label for="domain">Domain</label><input id="domain" type="text" placeholder="Enter domain" maxlength="180" required data-job></div>
+      <div class="field"><label for="company">Company</label><input id="company" type="text" placeholder="Enter company" maxlength="180" required data-job></div>
+      <div class="field"><label for="position">Position</label><input id="position" type="text" placeholder="Enter position" maxlength="180" required data-job></div>
+    </div>
+
+    <div class="field"><label for="job-url">Job description link (optional)</label><input id="job-url" type="url" placeholder="https://example.com/job-description" maxlength="2000" data-job></div>
+
+    <label class="check-row"><input type="checkbox" id="sync-cv" checked><span>Sync my saved CV with this interview <small>Use a copy of the CV saved in my account.</small></span></label>
+
+    <!-- INTERACTIVE EXTEND DIVIDER -->
+    <div class="cv-extend-divider">
+      <button type="button" class="cv-extend-trigger" id="custom-cv-toggle" aria-expanded="false" aria-controls="custom-cv-body">
+        <span>OR use a custom CV for this interview</span>
+        <span class="expander-chevron" aria-hidden="true">▾</span>
+      </button>
+    </div>
+
+    <!-- CUSTOM CV BODY (Unfolds directly on the main panel) -->
+    <div class="custom-cv-body is-hidden" id="custom-cv-body">
+        <div class="profile-cv-stack">
+          <!-- Section 1 -->
+          <div class="cv-section-card">
+            <div class="cv-section-meta">
+              <span class="cv-section-num">01</span>
+              <div class="cv-section-title-wrap">
+                <label for="job-cv-0" class="cv-section-title">Personal Profile</label>
+                <span class="cv-section-hint">Summary of professional identity, core mindset & career focus</span>
+              </div>
+            </div>
+            <div class="cv-section-content">
+              <textarea id="job-cv-0" data-job-cv="0" rows="3" maxlength="6000" placeholder="Describe your background and professional positioning..."></textarea>
+            </div>
+          </div>
+
+          <!-- Section 2 -->
+          <div class="cv-section-card">
+            <div class="cv-section-meta">
+              <span class="cv-section-num">02</span>
+              <div class="cv-section-title-wrap">
+                <label for="job-cv-1" class="cv-section-title">Education History</label>
+                <span class="cv-section-hint">Degrees, institutions, honors, and notable coursework</span>
+              </div>
+            </div>
+            <div class="cv-section-content">
+              <textarea id="job-cv-1" data-job-cv="1" rows="3" maxlength="6000" placeholder="List your education, degrees, and academic achievements..."></textarea>
+            </div>
+          </div>
+
+          <!-- Section 3 -->
+          <div class="cv-section-card">
+            <div class="cv-section-meta">
+              <span class="cv-section-num">03</span>
+              <div class="cv-section-title-wrap">
+                <label for="job-cv-2" class="cv-section-title">Work & Research Experience</label>
+                <span class="cv-section-hint">Past roles, key responsibilities, and quantified achievements</span>
+              </div>
+            </div>
+            <div class="cv-section-content">
+              <textarea id="job-cv-2" data-job-cv="2" rows="4" maxlength="6000" placeholder="Highlight your work history and project outcomes..."></textarea>
+            </div>
+          </div>
+
+          <!-- Section 4 -->
+          <div class="cv-section-card">
+            <div class="cv-section-meta">
+              <span class="cv-section-num">04</span>
+              <div class="cv-section-title-wrap">
+                <label for="job-cv-3" class="cv-section-title">Core Skills</label>
+                <span class="cv-section-hint">Technical proficiencies, industry tools, and interpersonal strengths</span>
+              </div>
+            </div>
+            <div class="cv-section-content">
+              <textarea id="job-cv-3" data-job-cv="3" rows="3" maxlength="6000" placeholder="List your technical, tactical, and leadership skills..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- PDF UPLOAD FOR THIS INTERVIEW -->
+        <div class="cv-or-divider">
+          <span>OR you can upload your CV</span>
+        </div>
+
+        <div class="cv-pdf-dropzone" id="interview-pdf-dropzone" tabindex="0" role="button" aria-label="Upload PDF resume for this interview">
+          <input type="file" id="interview-pdf-input" accept=".pdf,application/pdf" class="visually-hidden">
+          <div class="dropzone-icon" aria-hidden="true">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <path d="M12 18v-6"></path>
+              <path d="M9 15l3-3 3 3"></path>
+            </svg>
+          </div>
+          <h3>Upload your PDF Resume</h3>
+          <p class="dropzone-text">Drag and drop your file here, or <button type="button" class="btn-text-action" id="interview-browse-pdf-btn">browse from computer</button></p>
+          <span class="dropzone-hint">Supports PDF only (up to 10MB)</span>
+        </div>
+
+        <div class="cv-pdf-card is-hidden" id="interview-pdf-card">
+          <div class="pdf-card-file">
+            <div class="pdf-icon-badge" aria-hidden="true">PDF</div>
+            <div class="pdf-file-details">
+              <div class="pdf-file-name" id="interview-pdf-name">Interview_Resume.pdf</div>
+              <div class="pdf-file-meta">
+                <span id="interview-pdf-size">340 KB</span>
+                <span class="meta-dot">•</span>
+                <span>Attached to this interview</span>
+              </div>
+            </div>
+          </div>
+          <div class="pdf-card-actions">
+            <button class="btn btn-secondary btn-sm" id="interview-replace-pdf-btn" type="button">Replace</button>
+            <button class="btn btn-quiet btn-sm text-danger" id="interview-remove-pdf-btn" type="button">Remove</button>
+          </div>
+        </div>
+
+        <p class="form-status" id="interview-pdf-status" role="status"></p>
+      </div>
+
+    <p class="form-error" id="job-error" role="alert" hidden></p>
+    <div class="form-bottom align-end">
+      <button class="btn" type="submit">Continue <span aria-hidden="true">→</span></button>
+    </div>
+  </form>
+</main>
+<footer class="site-footer"><span>Akagikay · Interview AI Assistant</span></footer>
+<noscript><p class="noscript">Enable JavaScript to save your demo answers and use the forms.</p></noscript>
+</body>
+</html>

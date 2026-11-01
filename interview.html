@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Interview · Akagikay</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/data.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body data-page="interview">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <nav class="header-inner" aria-label="Main navigation">
+    <a class="brand header-brand" href="dashboard.html">
+      <span class="brand-icon"><img src="assets/logo.svg" alt="" aria-hidden="true"></span>
+      <span class="brand-text">Akagikay</span>
+    </a>
+    <div class="header-nav">
+      <a class="nav-link" href="dashboard.html" data-nav="dashboard">Dashboard</a>
+      <a class="nav-link" href="storage.html" data-nav="storage">Your interview</a>
+      <a class="nav-link" href="system-feedback.html" data-nav="feedback">System feedback</a>
+    </div>
+    <div class="header-right">
+      <a class="profile-link" href="profile.html" aria-label="Profile" title="Profile" data-nav="profile">
+        <img class="header-avatar" src="assets/avatar.svg" alt="">
+        <span class="profile-name" data-username>Eric Arthur Blair</span>
+      </a>
+    </div>
+  </nav>
+</header>
+<main id="main" class="page interview-page">
+  <section class="panel interview-panel">
+    <div class="interview-header">
+      <h2 id="question-title">Question 1</h2>
+      <span class="interview-step-badge" id="question-badge">1 of 3</span>
+    </div>
+
+    <!-- Question Prompt Card -->
+    <blockquote class="question" id="question-text">
+      Imagine you're tasked with curating a time capsule that defines the year 2026 for an alien civilization. What are three objects you put inside?
+    </blockquote>
+
+    <!-- Unified Answer Composer with Prominent Voice Dock -->
+    <div class="answer-section">
+      <div class="answer-composer">
+        <div class="composer-header">
+          <label class="answer-label" for="answer">Your Answer</label>
+          <span class="composer-word-count" id="answer-char-count">0 characters</span>
+        </div>
+        <div class="field answer-field">
+          <textarea id="answer" data-answer="0" rows="6" maxlength="10000" placeholder="Type or record your answer..."></textarea>
+        </div>
+
+        <!-- Prominent Voice Recording Dock -->
+        <div class="composer-voice-dock">
+          <div class="voice-dock-left">
+            <button type="button" class="btn-mic-hero" id="mic-toggle-btn" aria-label="Record answer with microphone">
+              <span class="mic-icon-circle">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <line x1="12" y1="19" x2="12" y2="23"></line>
+                  <line x1="8" y1="23" x2="16" y2="23"></line>
+                </svg>
+              </span>
+              <span class="mic-btn-content">
+                <span class="mic-btn-title" id="mic-btn-label">Record Answer with Microphone</span>
+                <span class="mic-btn-sub" id="mic-btn-sub">Click to start speech-to-text</span>
+              </span>
+            </button>
+          </div>
+          <div class="voice-dock-right">
+            <div class="voice-waveform" id="voice-waveform" aria-hidden="true">
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+              <span class="wave-bar"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Centered Navigation Buttons (Same Color) -->
+    <div class="interview-navigation">
+      <button type="button" class="btn is-hidden" id="prev-question-btn">← Previous Question</button>
+      <button type="button" class="btn" id="next-question-btn">Next Question →</button>
+    </div>
+  </section>
+</main>
+<footer class="site-footer"><span>Akagikay · Interview AI Assistant</span></footer>
+
+<!-- Auto-triggered Save and Exit Modal (Full-Page Blur Overlay) -->
+<div class="dialog-backdrop is-hidden" id="interview-exit-modal" role="dialog" aria-modal="true" aria-labelledby="saved-title">
+  <section class="saved-dialog">
+    <span class="badge">SAVED</span>
+    <h1 id="saved-title">Your interview has been saved as <span id="saved-name">interview 1</span></h1>
+    <a class="btn" id="exit-modal-confirm-btn" href="dashboard.html" autofocus>Proceed</a>
+  </section>
+</div>
+<noscript><p class="noscript">Enable JavaScript to save your demo answers and use the forms.</p></noscript>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>System Feedback · Akagikay</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/data.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body data-page="system-feedback">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <nav class="header-inner" aria-label="Main navigation">
+    <a class="brand header-brand" href="dashboard.html">
+      <span class="brand-icon"><img src="assets/logo.svg" alt="" aria-hidden="true"></span>
+      <span class="brand-text">Akagikay</span>
+    </a>
+    <div class="header-nav">
+      <a class="nav-link" href="dashboard.html" data-nav="dashboard">Dashboard</a>
+      <a class="nav-link" href="storage.html" data-nav="storage">Your interview</a>
+      <a class="nav-link is-active" href="system-feedback.html" data-nav="feedback">System feedback</a>
+    </div>
+    <div class="header-right">
+      <a class="profile-link" href="profile.html" aria-label="Profile" title="Profile" data-nav="profile">
+        <img class="header-avatar" src="assets/avatar.svg" alt="">
+        <span class="profile-name" data-username>Eric Arthur Blair</span>
+      </a>
+    </div>
+  </nav>
+</header>
+<main id="main" class="page feedback-page">
+  <form class="panel survey-panel" id="feedback-form" action="thank-you.html">
+    <div class="survey-list">
+      <div class="survey-row">
+        <label class="survey-label" for="feedback-0">
+          <span class="survey-number">01</span>
+          <span class="survey-text">Did you get a Golden Experience with the accuracy of the AI-generated interview feedback?</span>
+        </label>
+        <div class="survey-field-input">
+          <textarea id="feedback-0" rows="3" maxlength="5000" placeholder="Type your answer..."></textarea>
+        </div>
+      </div>
+
+      <div class="survey-row">
+        <label class="survey-label" for="feedback-1">
+          <span class="survey-number">02</span>
+          <span class="survey-text">How intuitive and easy-to-use did you find the interview navigation and interface?</span>
+        </label>
+        <div class="survey-field-input">
+          <textarea id="feedback-1" rows="3" maxlength="5000" placeholder="Type your answer..."></textarea>
+        </div>
+      </div>
+
+      <div class="survey-row">
+        <label class="survey-label" for="feedback-2">
+          <span class="survey-number">03</span>
+          <span class="survey-text">Did you encounter any bugs, technical issues, during your session? If so, please describe them.</span>
+        </label>
+        <div class="survey-field-input">
+          <textarea id="feedback-2" rows="3" maxlength="5000" placeholder="Type your answer..."></textarea>
+        </div>
+      </div>
+
+      <div class="survey-row">
+        <label class="survey-label" for="feedback-3">
+          <span class="survey-number">04</span>
+          <span class="survey-text">Were the interview questions appropriate for your targeted job profile and experience level?</span>
+        </label>
+        <div class="survey-field-input">
+          <textarea id="feedback-3" rows="3" maxlength="5000" placeholder="Type your answer..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="survey-actions">
+      <button class="btn btn-submit-feedback" type="submit">Submit feedback <span aria-hidden="true">→</span></button>
+    </div>
+  </form>
+</main>
+<footer class="site-footer"><span>Akagikay · Interview AI Assistant</span></footer>
+<noscript><p class="noscript">Enable JavaScript to save your demo answers and use the forms.</p></noscript>
+</body>
+</html>

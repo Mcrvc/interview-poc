@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Interview Done! · Akagikay</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/data.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body data-page="done-interview">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <nav class="header-inner" aria-label="Main navigation">
+    <a class="brand header-brand" href="dashboard.html">
+      <span class="brand-icon"><img src="assets/logo.svg" alt="" aria-hidden="true"></span>
+      <span class="brand-text">Akagikay</span>
+    </a>
+    <div class="header-nav">
+      <a class="nav-link" href="dashboard.html" data-nav="dashboard">Dashboard</a>
+      <a class="nav-link" href="storage.html" data-nav="storage">Your interview</a>
+      <a class="nav-link" href="system-feedback.html" data-nav="feedback">System feedback</a>
+    </div>
+    <div class="header-right">
+      <a class="profile-link" href="profile.html" aria-label="Profile" title="Profile" data-nav="profile">
+        <img class="header-avatar" src="assets/avatar.svg" alt="">
+        <span class="profile-name" data-username>Eric Arthur Blair</span>
+      </a>
+    </div>
+  </nav>
+</header>
+<main id="main" class="page completion-page">
+
+<section class="completion panel">
+<h1>Interview Done!</h1>
+<form id="done-form" action="report.html">
+<div class="field"><label for="interview-name"><span class="sr-only">Interview name</span></label><input id="interview-name" type="text" placeholder="Type the interview name to save..." maxlength="100"></div>
+<button class="btn btn-wide" type="submit">View Report <span aria-hidden="true">→</span></button>
+</form></section>
+</main>
+<footer class="site-footer"><span>Akagikay · Interview AI Assistant</span></footer>
+<noscript><p class="noscript">Enable JavaScript to save your demo answers and use the forms.</p></noscript>
+</body>
+</html>

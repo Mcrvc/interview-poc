@@ -2,8 +2,8 @@
 (() => {
   "use strict";
   const DATA = window.POC_DATA;
-  const KEY = "akagikay-poc-v2";
-  const PREFIX = "akagikay-poc:";
+  const KEY = "yourin-poc-v2";
+  const PREFIX = "yourin-poc:";
   const $ = selector => document.querySelector(selector);
   const $$ = selector => [...document.querySelectorAll(selector)];
   const page = document.body.dataset.page;

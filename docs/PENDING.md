@@ -57,7 +57,7 @@ nằm ngoài phạm vi PoC đã thống nhất.
 ### 2. Giải pháp đã triển khai (Lấy cảm hứng từ bố cục Google DeepMind / Google Showcase)
 - **Trạng thái: DONE (Đã hoàn thành)**
   - `poc/dashboard.html`: Đã chuyển đổi hoàn toàn sang bố cục Hero Banner + Centered Editorial Copy + 3 Thẻ Banner tương tác (Feature Cards).
-  - `poc/assets/dashboard-hero-banner.svg`: Tạo banner hero lớn trung tâm với quả cầu kính AI phát sáng (Glass Orb), vòng sóng âm và biểu tượng Akagikay.
+  - `poc/assets/dashboard-hero-banner.svg`: Tạo banner hero lớn trung tâm với quả cầu kính AI phát sáng (Glass Orb), vòng sóng âm và biểu tượng Yourin.
   - `poc/assets/card-banner-1.svg`: Tạo banner nhỏ minh họa hồ sơ công việc & CV đồng bộ cho thẻ "Create a new interview".
   - `poc/assets/card-banner-2.svg`: Tạo banner nhỏ nền tối tương phản cao với mạng hạt AI & báo cáo phân tích cho thẻ "View your interview".
   - `poc/assets/card-banner-3.svg`: Tạo banner nhỏ minh họa đánh giá sao & phản hồi trải nghiệm cho thẻ "Rate our assistant".
@@ -73,8 +73,8 @@ nằm ngoài phạm vi PoC đã thống nhất.
    - Xóa hoàn toàn hình nút Play giả video trong `assets/dashboard-hero-banner.svg`, giữ lại cụm đồ họa quả cầu kính AI (Glass Orb), sóng âm và biểu tượng `Logo.svg`.
 2. **Đưa Tên ứng dụng + Mô tả ngắn vào trong một Big Banner chia 2 bên (Split Hero Banner)**:
    - Gộp thành một **Big Hero Banner** lớn duy nhất chia 2 cột hài hòa:
-     - **Một bên (Cột nội dung)**: Hiển thị huy hiệu thương hiệu **Akagikay**, tiêu đề chính và đoạn mô tả ngắn gọn về trợ lý phỏng vấn AI, kèm nút bắt đầu phỏng vấn.
-     - **Bên còn lại (Cột đồ họa)**: Tái sử dụng cụm thiết kế quả cầu kính AI, vòng sóng âm đồng tâm và biểu tượng Akagikay (đã bỏ nút Play).
+     - **Một bên (Cột nội dung)**: Hiển thị huy hiệu thương hiệu **Yourin**, tiêu đề chính và đoạn mô tả ngắn gọn về trợ lý phỏng vấn AI, kèm nút bắt đầu phỏng vấn.
+     - **Bên còn lại (Cột đồ họa)**: Tái sử dụng cụm thiết kế quả cầu kính AI, vòng sóng âm đồng tâm và biểu tượng Yourin (đã bỏ nút Play).
 3. **Loại bỏ dòng `Welcome, <username>`**:
    - Xóa phần `Welcome, Eric Arthur Blair` khỏi Dashboard để giao diện tinh gọn, tập trung vào giá trị sản phẩm.
 4. **Hiệu ứng "Rise Up" khi cuộn chuột xuống cho 3 Small Banners (`.feature-card`)**:
@@ -94,7 +94,7 @@ nằm ngoài phạm vi PoC đã thống nhất.
 ### 1. Thay đổi
 - **Trạng thái: DONE (Đã hoàn thành)**
   - Đã xóa hoàn toàn khối `.hero-brand-badge` (logo nhỏ và nền hình chữ nhật bo tròn) trên `poc/dashboard.html` và `poc/css/styles.css`.
-  - Đưa tên ứng dụng trực tiếp vào tiêu đề chính (`Akagikay: Your realistic and interactive AI interview assistant`) đúng theo bố cục tối giản của Google.
+  - Đưa tên ứng dụng trực tiếp vào tiêu đề chính (`Yourin: Your realistic and interactive AI interview assistant`) đúng theo bố cục tối giản của Google.
 
 ---
 
@@ -105,7 +105,7 @@ nằm ngoài phạm vi PoC đã thống nhất.
   - **Xóa toàn bộ `.eyebrow`**: Đã loại bỏ hoàn toàn các nhãn chỉ dẫn thừa như `01 / Set up your interview`, `02 / Practice`, `03 / Review`, `01 / CV` .. `04 / CV`, `Interview AI Assistant` trên toàn bộ 14 trang HTML.
   - **Header dạng Floating Glassmorphic Pill Navbar**:
     - Chuyển thanh header phẳng cũ sang thanh điều hướng nổi dạng viên thuốc bo tròn (`border-radius: 100px`), hiệu ứng kính mờ (`backdrop-filter: blur(16px)`), đổ bóng nhẹ và dính cố định (`position: sticky; top: 14px`).
-    - **Vùng trái**: Đặt `Logo.svg` trong khung tròn nhỏ màu xanh đậm tương phản cao đi cùng tên thương hiệu **Akagikay** (chuyển về `dashboard.html`).
+    - **Vùng trái**: Đặt `Logo.svg` trong khung tròn nhỏ màu xanh đậm tương phản cao đi cùng tên thương hiệu **Yourin** (chuyển về `dashboard.html`).
     - **Vùng giữa**: Cụm 3 tab điều hướng nhanh tinh gọn gồm **Dashboard**, **Your interview** và **System feedback**, tự động sáng active tương ứng từng trang.
     - **Vùng phải**: Nâng cấp nút Avatar thành Profile Pill với ảnh đại diện sắc nét và tên tài khoản `[data-username]`, loại bỏ huy hiệu `POC DEMO` thừa.
     - Tương thích responsive hoàn hảo trên tablet và mobile.
@@ -212,7 +212,7 @@ Giữ bố cục thẻ `.profile-panel` gọn đẹp hiện tại ở phần tr�
 ### 1. Thay đổi đã triển khai
 - **Trạng thái: DONE (Đã hoàn thành)**
   - **Tiêu đề trang & Phần đầu trang (`poc/profile.html`)**:
-    - Khôi phục `<title>Profile · Akagikay</title>`.
+    - Khôi phục `<title>Profile · Yourin</title>`.
     - **Loại bỏ hoàn toàn khối `.page-heading`** (tiêu đề và mô tả phụ đầu trang), trang mở ra liền mạch và hiện đại ngay từ thẻ thông tin cá nhân.
   - **Làm sạch Khu vực Account (`poc/profile.html`, `poc/css/styles.css`, `poc/js/app.js`)**:
     - Loại bỏ tiêu đề thừa `"Account Credentials"` và đoạn văn hướng dẫn.
@@ -227,7 +227,7 @@ Giữ bố cục thẻ `.profile-panel` gọn đẹp hiện tại ở phần tr�
 
 ### 2. Danh sách file sẽ cập nhật khi triển khai
 1. **`poc/profile.html`**:
-   - Khôi phục `<title>Profile · Akagikay</title>` và xóa `.page-heading`.
+   - Khôi phục `<title>Profile · Yourin</title>` và xóa `.page-heading`.
    - Trong `.profile-panel`: xóa `<p class="demo-note">Demo profile</p>`, xóa `.profile-form-header`, xóa `#password-lock-badge`, xóa `<p class="unlock-hint">Default demo password is 123.</p>`.
    - Trong `.profile-cv-panel`: đổi tiêu đề thành `<h2>Your CV</h2>`, xóa `.cv-mode-switcher`, đặt khối tải PDF ngay bên dưới 4 mục văn bản qua vạch ngăn cách `<div class="cv-or-divider"><span>OR you can upload your CV</span></div>`.
 2. **`poc/css/styles.css`**:

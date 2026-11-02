@@ -16,10 +16,8 @@ Một số trang dài như Report có cuộn dọc.
 
 ## Kịch bản trình diễn
 
-1. **Create a new interview** → nhập Job title, Domain, Company, Position.
-   Có thể thêm đường dẫn Job description; demo chỉ lưu đường dẫn.
-2. **Input CV (Optional)** → sửa CV mẫu. Mỗi tài khoản demo có một CV.
-   **Input Job Profile** quay về form; **Continue** bắt đầu câu hỏi 1.
+1. **Create a new interview** → dán Job description, HTML hoặc link tuyển dụng; nếu không có, bấm nút chuyển sang nhập 4 trường thủ công. Có thể dùng CV tài khoản đã lưu hoặc bấm nút chuyển sang dán văn bản CV thuần / tải file PDF cho buổi phỏng vấn.
+2. Bấm **Continue** bắt đầu câu hỏi 1.
 3. Tùy chọn **Sync my saved CV with this interview** ở Job Profile quyết định
    có sao chép CV hiện tại vào buổi phỏng vấn mới hay không.
 4. Nhập câu trả lời → **Next Question** / **Previous Question**.

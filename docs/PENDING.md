@@ -811,3 +811,376 @@ Thay vì tách rời vạch chữ hướng dẫn và một khung hộp nút bấ
 - Đã kiểm tra SVG hợp lệ và `git diff --check`. Các kiểm tra này là kiểm tra tĩnh; chưa chạy kiểm tra trình duyệt tự động trong môi trường hiện tại.
 
 **Trạng thái:** DONE — Đã được người dùng duyệt, sẵn sàng commit và push lên `main`.
+
+
+---
+
+## [DONE] Cải thiện trải nghiệm trang Job Profile (`job-profile.html`): Ưu tiên ô dán Job Description (Link / Text / HTML) trước, ẩn 4 trường nhập tay thành mục mở rộng dự phòng
+
+### 1. Vấn đề hiện tại & Góp ý từ Giáo sư
+- Hiện tại, ngay khi mở `job-profile.html`, người dùng lập tức phải đối mặt với 4 trường nhập tay bắt buộc (`Job title`, `Domain`, `Company`, `Position`), trong khi ô `Job description link` lại nằm bên dưới như một trường phụ tùy chọn.
+- Giáo sư nhận xét bố cục này chưa thân thiện với người dùng thực tế: thông thường ứng viên đã có sẵn đường dẫn (link) tin tuyển dụng, văn bản mô tả công việc (plain text) hoặc mã HTML copy từ trang tuyển dụng. Việc bắt họ tự bóc tách và gõ lại 4 trường ngay từ đầu gây tốn thời gian.
+- **Yêu cầu luồng mới**:
+  1. **Hiển thị đầu tiên (Mặc định)**: Cung cấp vùng nhập chính để người dùng dán trực tiếp **Job Description (văn bản thuần, HTML hoặc đường dẫn URL)** để hệ thống quét thông tin *(lưu ý: chức năng quét/bóc tách tự động chưa triển khai trong phạm vi PoC, chỉ nhận và lưu nội dung người dùng nhập)*.
+  2. **Trường hợp người dùng không có sẵn JD/Link (Fallback)**: Cho phép bấm mở rộng (hoặc chuyển sang) khu vực **4 trường bắt buộc** (`Job title`, `Domain`, `Company`, `Position`) để tự điền thủ công.
+
+### 2. Giải pháp thiết kế & Bố cục chi tiết
+
+#### A. Khu vực 1 — Ô nhập Job Description / Link ưu tiên hiển thị đầu tiên (`#job-primary-input`)
+- Đặt ngay dưới tiêu đề `<h2>Job Profile</h2>`:
+  - **Trường chính — `Job Description (Link, Text, or HTML)`** (`#job-source` hoặc kết hợp ô `#job-url` + `#job-raw`):
+    - Sử dụng một vùng `<textarea id="job-source" rows="5">` rộng rãi, dễ dán nội dung (hoặc kèm ô URL/Text rõ ràng) với nhãn hướng dẫn thân thiện:
+      - **Label**: `Paste job description, HTML, or job link`
+      - **Hint / Placeholder**: *"Paste a job posting URL (https://...), raw job description text, or copied HTML here so we can scan the role details..."*
+  - Trong phạm vi PoC offline: nội dung (link, text hoặc HTML) được lưu trực tiếp vào `account.job` và gắn với buổi phỏng vấn khi bấm `Continue →` (không gọi backend hay chạy trình phân tích thực tế).
+
+#### B. Khu vực 2 — Mục mở rộng 4 trường bắt buộc khi không có sẵn JD/Link (`#manual-job-body`)
+- Ngay bên dưới ô nhập Job Description chính, đặt thanh chuyển đổi / mở rộng đồng bộ với phong cách `.cv-extend-divider` của trang:
+  `──────────  Don't have a job description or link? Enter 4 fields manually ▾  ──────────`
+- **Trạng thái mặc định (Collapsed / Ẩn)**:
+  - Khối `.form-grid` chứa 4 trường (`#job-title`, `#domain`, `#company`, `#position`) được ẩn (`class="form-grid is-hidden"`, `aria-hidden="true"`).
+  - Bỏ thuộc tính HTML `required` cứng trên 4 thẻ `<input>` khi đang ẩn để trình duyệt không chặn submit khi người dùng đã dán JD/Link ở trên.
+- **Trạng thái khi người dùng bấm mở rộng (Expanded / Hiện)**:
+  - Hiển thị lưới 2×2 `.form-grid` gồm 4 trường bắt buộc:
+    1. **Job title** (`#job-title`)
+    2. **Domain** (`#domain`)
+    3. **Company** (`#company`)
+    4. **Position** (`#position`)
+  - Khi người dùng chọn nhập theo cách thủ công này (hoặc khi ô JD/Link phía trên để trống), hệ thống yêu cầu điền đủ 4 trường trước khi sang trang phỏng vấn.
+
+#### C. Logic kiểm tra hợp lệ (Validation) & Tương tác trong `js/app.js`
+1. **Cơ chế ưu tiên & loại trừ rõ ràng**:
+   - **Cách 1 (Mặc định — Dùng JD Text / HTML / Link)**: Nếu người dùng dán nội dung vào ô Job Description (text, HTML hoặc URL) và không mở (hoặc không dùng) 4 trường thủ công → Cho phép bấm `Continue →` ngay mà không bắt nhập 4 trường.
+   - **Cách 2 (Dự phòng — Không có JD/Link, nhập 4 trường bắt buộc)**: Nếu người dùng mở khung 4 trường thủ công để nhập (hoặc để trống ô JD/Link), kiểm tra bắt buộc cả 4 trường `Job title`, `Domain`, `Company`, `Position` phải có giá trị; nếu thiếu báo lỗi rõ ràng tại `#job-error`.
+2. **Tương thích dữ liệu (`account.job`)**:
+   - Bổ sung khóa `job-source` (hoặc giữ tương thích với `job-url` và 4 khóa `job-title`, `domain`, `company`, `position`) trong `jobKeys` của `js/app.js`.
+   - Khi tải lại trang `job-profile.html`: nếu dữ liệu đã lưu trước đó chỉ có 4 trường thủ công mà không có `job-source`, tự động mở sẵn khung 4 trường để người dùng thấy dữ liệu cũ.
+3. **Giữ nguyên phần chọn CV bên dưới**:
+   - Checkbox `Use my saved CV for this interview` và thanh mở rộng `Customize CV for this interview` giữ nguyên vị trí và hành vi phía dưới khu vực Job Profile.
+
+### 3. Danh sách file dự kiến cập nhật khi triển khai
+1. **`job-profile.html`**:
+   - Đưa vùng nhập `Paste job description, HTML, or job link` (`#job-source`) lên đầu form `#job-form`.
+   - Đặt thanh mở rộng `#manual-job-toggle` (*"Don't have a job description or link? Enter details manually"*) ngay bên dưới.
+   - Đưa `.form-grid` (4 trường `Job title`, `Domain`, `Company`, `Position`) vào khối `#manual-job-body` (mặc định ẩn `.is-hidden`).
+2. **`css/styles.css`**:
+   - Tinh chỉnh style cho vùng `#job-source` (`textarea` cỡ vừa, font dễ đọc khi dán text/HTML/URL) và khoảng cách với thanh mở rộng `#manual-job-toggle` cùng khối `.form-grid` khi mở ra.
+3. **`js/app.js`**:
+   - Cập nhật `jobKeys` và hàm `saveJob()` để lưu cả nội dung JD/HTML/Link lẫn 4 trường thủ công.
+   - Thêm sự kiện đóng/mở cho `#manual-job-toggle` / `#manual-job-body`.
+   - Cập nhật kiểm tra submit của `#job-form`: hợp lệ khi người dùng đã nhập ô JD/HTML/Link **hoặc** đã điền đủ 4 trường bắt buộc.
+4. **`docs/README.md` & `docs/TRANSITIONS.md`** (nếu cần):
+   - Cập nhật mô tả ngắn về luồng nhập Job Profile mới.
+
+### 4. Trạng thái
+- **DONE** — Đã triển khai và kiểm tra tĩnh.
+
+
+---
+
+## [DONE] Tinh gọn trang Job Profile (`job-profile.html`): Bỏ hoàn toàn các nút mở rộng (Extend), dùng nút bấm thường để chuyển đổi sang 4 trường Job Profile & Đơn giản hóa CV tùy chỉnh thành dán Raw Text hoặc tải PDF
+
+### 1. Vấn đề hiện tại
+- **Lạm dụng thanh mở rộng (`.cv-extend-divider` / Extend Button)**: Việc có tới 2 thanh mở rộng (`▾`) nối tiếp nhau trên cùng một trang (`Don't have a job description... ▾` và `Customize CV for this interview ▾`) làm giao diện bị rối, khi mở ra khiến trang kéo dài và chồng chéo nhiều trường.
+- **Nhập Job Profile chưa dứt khoát**: Khi bấm mở rộng, cả ô dán Job Description lớn lẫn 4 trường nhập tay cùng hiển thị một lúc khiến người dùng bối rối không biết hệ thống sẽ lấy dữ liệu nào. Cần **chuyển đổi (switch)** hẳn giữa 2 chế độ bằng một **nút bấm bình thường (normal button)** kèm dòng hướng dẫn ngắn.
+- **Phần Customize CV trên `job-profile.html` quá nặng nề**: Việc lặp lại nguyên 4 mục CV lớn (`01 Personal Profile` .. `04 Core Skills`) ngay trong trang Job Profile là dư thừa và nặng nề. Trên trang `job-profile.html`, nếu người dùng muốn nhập CV riêng cho buổi phỏng vấn, chỉ cần cho phép **dán văn bản CV thuần (Raw Text) hoặc tải file PDF**.
+
+---
+
+### 2. Giải pháp thiết kế & Bố cục chi tiết (Chỉ áp dụng trên `job-profile.html`)
+
+#### A. Khu vực 1 — Job Profile: Chuyển đổi trực tiếp giữa 2 chế độ bằng Nút bấm thường (Không dùng Extend)
+Loại bỏ hoàn toàn thanh `.cv-extend-divider` (`▾`). Tại một thời điểm chỉ hiển thị **1 trong 2 khung**:
+
+1. **Chế độ 1 (Mặc định) — Dán Job Description / HTML / Link (`#job-paste-mode`)**:
+   - Hiển thị ô `<textarea id="job-source" rows="5">` với nhãn `Paste job description, HTML, or job link`.
+   - Ngay bên dưới là thanh hướng dẫn nhỏ (`.mode-switch-bar`):
+     - Chữ hướng dẫn nhỏ (`.mode-switch-hint`): *"Don't have a job description or link to paste?"*
+     - **Nút bấm thường** (`<button type="button" class="btn btn-secondary btn-sm" id="switch-to-manual-job">Enter 4 fields manually</button>`).
+   - Khi bấm nút **`Enter 4 fields manually`**: ẩn hoàn toàn `#job-paste-mode` và hiện `#job-manual-mode` ngay tại vị trí đó.
+
+2. **Chế độ 2 (Khi chuyển sang) — Nhập 4 trường bắt buộc (`#job-manual-mode`, mặc định `.is-hidden`)**:
+   - Hiển thị lưới 2×2 `.form-grid` gồm 4 trường bắt buộc: **Job title** (`#job-title`), **Domain** (`#domain`), **Company** (`#company`), **Position** (`#position`).
+   - Ngay bên dưới là thanh hướng dẫn nhỏ (`.mode-switch-bar`):
+     - Chữ hướng dẫn nhỏ (`.mode-switch-hint`): *"Have a job description, HTML, or link?"*
+     - **Nút bấm thường** (`<button type="button" class="btn btn-secondary btn-sm" id="switch-to-paste-job">Paste job description instead</button>`) để quay lại chế độ dán nếu cần.
+
+---
+
+#### B. Khu vực 2 — CV cho buổi phỏng vấn: Bỏ nút Extend & Bỏ 4 trường CV, chỉ dùng Raw Text hoặc PDF
+Loại bỏ hoàn toàn thanh `.cv-extend-divider` (`Customize CV for this interview ▾`) và xóa 4 thẻ mục CV (`01`–`04`) khỏi `job-profile.html`.
+
+1. **Trạng thái mặc định — Dùng CV đã lưu (`#cv-saved-mode`)**:
+   - Giữ hộp kiểm `.check-row`: **`Use my saved CV for this interview`** (*"Use a copy of the CV saved in my account."*).
+   - Ngay bên dưới (hoặc tích hợp gọn gàng trong thanh hướng dẫn `.mode-switch-bar`):
+     - Chữ hướng dẫn nhỏ: *"Want to use a different CV for this session?"*
+     - **Nút bấm thường** (`<button type="button" class="btn btn-secondary btn-sm" id="switch-to-custom-cv">Paste raw CV or upload PDF</button>`).
+
+2. **Khi bấm chuyển sang Custom CV (`#custom-cv-body`)**:
+   - Ẩn khối chọn Saved CV (hoặc tự động bỏ chọn `Use my saved CV`) và hiển thị khung **Custom CV gọn nhẹ** gồm:
+     - **Thanh tiêu đề phụ + Nút quay lại**: Nhãn **`Custom CV for this interview`** bên trái, kèm nút bấm thường `<button type="button" class="btn btn-secondary btn-sm" id="switch-to-saved-cv">Use saved CV instead</button>` bên phải.
+     - **Ô dán văn bản CV thuần (Raw Text)**:
+       - Một trường `<textarea id="job-cv-raw" rows="5" placeholder="Paste your raw CV or resume text here...">` duy nhất (thay thế hoàn toàn 4 ô `01`–`04` cũ).
+     - **Vạch ngăn cách ngắn**: `OR you can upload your CV`
+     - **Khối tải file PDF (`#interview-pdf-dropzone` & `#interview-pdf-card`)**: Kéo-thả hoặc chọn file `.pdf` từ máy tính.
+     - **Cơ chế loại trừ lẫn nhau (Mutual Exclusivity)**:
+       - Gõ/dán vào ô `#job-cv-raw` sẽ tự động gỡ file PDF đang đính kèm (nếu có).
+       - Tải file PDF lên sẽ tự động xóa trắng ô `#job-cv-raw`.
+
+---
+
+### 3. Logic kiểm tra hợp lệ & Lưu dữ liệu (`js/app.js`)
+1. **Kiểm tra Job Profile theo chế độ đang hiển thị (`jobInputMode`: `"paste"` | `"manual"`)**:
+   - Nếu đang ở chế độ `"paste"`: yêu cầu `#job-source` không được để trống (báo lỗi: *"Paste a job description, HTML, or job link, or click 'Enter 4 fields manually'."*).
+   - Nếu đang ở chế độ `"manual"`: yêu cầu điền đủ cả 4 trường (`Job title`, `Domain`, `Company`, `Position`); nếu thiếu báo lỗi: *"Enter a value for each of the 4 required job profile fields."*.
+2. **Kiểm tra & Lưu CV theo chế độ đang chọn (`cvInputMode`: `"saved"` | `"custom"`)**:
+   - Nếu đang ở chế độ `"saved"`: nếu `#sync-cv` được tích → sao chép CV đã lưu của tài khoản; nếu bỏ tích → bắt đầu phỏng vấn không kèm CV (`"none"`).
+   - Nếu đang ở chế độ `"custom"`:
+     - Nếu có `interviewPdf` → lưu PDF tùy chỉnh vào buổi phỏng vấn.
+     - Nếu có nội dung trong `#job-cv-raw` → lưu vào `interview.cv = [rawText, "", "", ""]` (tương thích 100% với cấu trúc `strings(interview.cv, 4)` của `validState`).
+     - Nếu cả `#job-cv-raw` và `interviewPdf` đều trống → báo lỗi yêu cầu dán CV hoặc tải PDF (hoặc bấm quay lại *Use saved CV instead*).
+
+---
+
+### 4. Danh sách file dự kiến cập nhật khi triển khai
+1. **`job-profile.html`**:
+   - Xóa cả 2 khối `.cv-extend-divider`.
+   - Thiết lập `#job-paste-mode` và `#job-manual-mode` chuyển đổi qua lại bằng nút bấm thường (`#switch-to-manual-job` / `#switch-to-paste-job`) kèm dòng hướng dẫn nhỏ.
+   - Thay thế 4 mục CV (`#job-cv-0..3`) trong `#custom-cv-body` bằng 1 ô `<textarea id="job-cv-raw">` duy nhất + vùng tải PDF, chuyển đổi bằng nút bấm thường (`#switch-to-custom-cv` / `#switch-to-saved-cv`).
+2. **`css/styles.css`**:
+   - Thêm style cho thanh chuyển đổi `.mode-switch-bar`, `.mode-switch-hint`, và header của `#custom-cv-body` (`.custom-cv-header`).
+3. **`js/app.js`**:
+   - Cập nhật controller trang `job-profile` để chuyển đổi mượt mà giữa `paste` ↔ `manual` (Job Profile) và `saved` ↔ `custom` (CV), áp dụng cơ chế loại trừ giữa `#job-cv-raw` và `interviewPdf`, và validate đúng theo chế độ đang hiển thị.
+
+### 5. Trạng thái
+- **DONE** — Đã triển khai và kiểm tra tĩnh.
+
+
+---
+
+## [DONE] Tinh chỉnh bố cục nút chuyển đổi Job Profile & Gộp phần CV thành một khung hộp thống nhất duy nhất (`job-profile.html`)
+
+### 1. Phân tích vấn đề bố cục hiện tại
+1. **Nút chuyển đổi của phần Job Profile đang bị đóng hộp thừa (`.mode-switch-bar` viền nét đứt)**:
+   - Ngay dưới ô nhập Job Profile, thanh `.mode-switch-bar` dùng nền xám nhạt kèm viền nét đứt (`border: 1px dashed #cadad6`) và đẩy câu hướng dẫn sang tận mép trái còn nút bấm sang tận mép phải (`justify-content: space-between`), vừa tạo cảm giác nặng nề như một chiếc hộp phụ, vừa làm mắt người dùng phải đảo ngang cả chiều rộng form.
+2. **Phần CV đang bị tách thành 2 hộp rời rạc (2 boxes)**:
+   - Ở trạng thái mặc định (`#cv-saved-mode`), có **2 hộp xếp chồng lên nhau**: hộp 1 là `.check-row` (*"Use my saved CV for this interview"*) và ngay sát dưới là hộp 2 `.mode-switch-bar` (*"Want to use a different CV for this session?"* + nút bấm).
+   - Ở trạng thái nhập CV tùy chỉnh (`#cv-custom-mode`), bên trong cũng tách thành **2 vùng hộp rời**: ô `<textarea id="job-cv-raw">` ở trên + vạch `OR` + hộp kéo thả `.cv-pdf-dropzone` to cồng kềnh ở dưới.
+
+---
+
+### 2. Giải pháp thiết kế lại (Re-layout & Merge)
+
+#### A. Bố cục lại nút chuyển đổi của phần Job Profile (Không đóng hộp, gom cụm gọn gàng)
+- **Bỏ hoàn toàn khung hộp viền nét đứt** dưới phần Job Profile.
+- **Đặt cụm hướng dẫn ngắn + nút chuyển chế độ** thành một **hàng phẳng gọn gàng (`.job-mode-footer`)** nằm ngay dưới ô nhập (hoặc tích hợp thẳng lên góc phải thanh tiêu đề `.panel-header` / nhãn trường):
+  - Hiển thị liền mạch trên nền trắng của panel (không viền, không màu nền hộp), căn phải hoặc căn trái gọn gàng (`display: flex; align-items: center; justify-content: flex-end; gap: 12px`):
+    - Chế độ dán JD: `<span class="mode-switch-hint">Don't have a job description or link?</span>` đi liền ngay cạnh nút `<button type="button" class="btn btn-secondary btn-sm" id="switch-to-manual-job">Enter 4 fields manually</button>`.
+    - Chế độ 4 trường: `<span class="mode-switch-hint">Have a job description, HTML, or link?</span>` đi liền ngay cạnh nút `<button type="button" class="btn btn-secondary btn-sm" id="switch-to-paste-job">Paste job description instead</button>`.
+
+---
+
+#### B. Gộp 2 hộp của phần CV thành MỘT Hộp Thống Nhất Duy Nhất (`.cv-unified-box`)
+Toàn bộ phần CV trên `job-profile.html` chỉ nằm gọn trong **1 khung hộp duy nhất** ở cả 2 trạng thái:
+
+1. **Khi ở trạng thái Saved CV (`#cv-saved-mode` — Gộp 2 hộp cũ thành 1 dòng hộp duy nhất)**:
+   - Thay vì 1 hộp `.check-row` + 1 hộp `.mode-switch-bar` tách rời, **gộp chung vào một thẻ `.cv-unified-card` duy nhất** (`display: flex; align-items: center; justify-content: space-between; gap: 20px; background: var(--soft); border: 1px solid var(--line); border-radius: 14px; padding: 18px 22px`):
+     - **Bên trái**: Hộp kiểm `<input type="checkbox" id="sync-cv" checked>` cùng tiêu đề **`Use my saved CV for this interview`** và dòng mô tả nhỏ *"Use a copy of the CV saved in my account."*
+     - **Bên phải (ngay trong cùng hộp)**: Nhãn gợi ý nhỏ *"Or use another CV:"* (hoặc nút trực tiếp) đi kèm nút **`Paste raw CV or upload PDF`** (`#switch-to-custom-cv`).
+
+2. **Khi bấm chuyển sang trạng thái Custom CV (`#cv-custom-mode` — Gộp ô dán Raw Text và tải PDF vào chung 1 hộp Composer duy nhất)**:
+   - Thay vì tách ô `<textarea>` ở trên và một hộp `.cv-pdf-dropzone` khổng lồ ở dưới qua vạch `OR`, **hợp nhất thành một khung hộp `.cv-unified-composer` duy nhất** (tương tự bố cục `.answer-composer` trên trang Interview):
+     - **Thanh tiêu đề hộp (`.cv-composer-header`)**:
+       - Bên trái: Tiêu đề **`Custom CV for this interview`** kèm chú thích nhỏ *"Paste raw CV text below or attach a PDF file"*.
+       - Bên phải: Nút **`Use saved CV instead`** (`#switch-to-saved-cv`) để quay về CV đã lưu.
+     - **Phần thân hộp (`.cv-composer-body`)**:
+       - Khi chưa đính kèm PDF: hiển thị ô `<textarea id="job-cv-raw" rows="5" placeholder="Paste your raw resume, CV text, or background summary here...">` nằm gọn bên trong hộp.
+       - Khi đã chọn/kéo-thả file PDF: ẩn `<textarea>` và hiển thị ngay thẻ file PDF đã đính kèm (`#interview-pdf-card`: tên file, dung lượng, nút `Replace` / `Remove`) ngay trong lòng hộp.
+     - **Thanh công cụ đáy hộp (`.cv-composer-dock` — tích hợp ngay đáy hộp, hỗ trợ cả bấm chọn lẫn kéo-thả PDF)**:
+       - Bên trái: Biểu tượng tệp PDF nhỏ + dòng chữ *"Prefer a PDF file? Drag & drop here or"*
+       - Bên phải: Nút bấm chọn file **`Upload PDF Resume`** (`#interview-browse-pdf-btn`, hỗ trợ `.pdf` tối đa 10MB).
+       - Toàn bộ khung hộp `.cv-unified-composer` cũng nhận sự kiện `dragover` / `drop` để người dùng có thể kéo thả file `.pdf` trực tiếp vào hộp bất cứ lúc nào.
+
+---
+
+### 3. Danh sách file dự kiến cập nhật khi triển khai
+1. **`job-profile.html`**:
+   - Chuyển thanh nút của `#job-paste-mode` và `#job-manual-mode` sang hàng phẳng `.job-mode-footer` (không đóng hộp nét đứt).
+   - Gộp `#cv-saved-mode` thành 1 hộp `.cv-unified-card` duy nhất chứa cả checkbox Saved CV (bên trái) và nút `Paste raw CV or upload PDF` (bên phải).
+   - Gộp `#cv-custom-mode` thành 1 hộp `.cv-unified-composer` duy nhất tích hợp header + ô `textarea#job-cv-raw` / thẻ `#interview-pdf-card` + thanh đáy `.cv-composer-dock` tải PDF (xóa bỏ vạch `.cv-or-divider` và hộp `.cv-pdf-dropzone` rời bên dưới).
+2. **`css/styles.css`**:
+   - Thêm style cho `.job-mode-footer`, `.cv-unified-card`, `.cv-unified-composer`, `.cv-composer-header`, `.cv-composer-body`, và `.cv-composer-dock`.
+3. **`js/app.js`**:
+   - Cập nhật hiển thị trong `#cv-custom-mode`: khi đính kèm PDF thì ẩn `#job-cv-raw` và hiện `#interview-pdf-card` ngay trong cùng hộp; khi bấm `Remove` PDF hoặc nhập chữ thì hiện lại `#job-cv-raw`.
+
+### 4. Trạng thái
+- **DONE** — Đã triển khai và kiểm tra tĩnh.
+
+
+---
+
+## [DONE] Thiết kế lại vị trí nút chuyển đổi `Enter 4 fields manually` của phần Job Profile (`job-profile.html`)
+
+### 1. Phân tích nguyên nhân khiến vị trí nút hiện tại chưa ổn
+- Hiện tại, dòng `.job-mode-footer` (*"Don't have a job description or link?"* + nút **`Enter 4 fields manually`**) đang nằm ở góc dưới bên phải của ô nhập Job Profile, **ngay sát phía trên** góc phải của hộp CV (`.cv-unified-card` cũng có *"Want a custom CV?"* + nút **`Paste raw CV or upload PDF`** ở bên phải).
+- Việc có **2 cụm `[Gợi ý + Nút phụ]` xếp chồng sát nhau ở cùng mép phải giữa trang** gây trùng lặp thị giác, làm người dùng dễ nhầm lẫn nút nào thuộc về Job Profile và nút nào thuộc về CV.
+- Ngoài ra, khi để nút ở dưới đáy ô nhập, lúc người dùng bấm chuyển qua lại giữa 1 ô `<textarea>` và lưới 4 trường (`.form-grid`), chiều cao khung thay đổi làm nút bấm bị nhảy vị trí lên/xuống.
+- Trong khi đó, thanh tiêu đề đầu trang `.panel-header` hiện chỉ có chữ `<h2>Job Profile</h2>` ở bên trái, bỏ trống hoàn toàn nửa bên phải.
+
+---
+
+### 2. Giải pháp thiết kế mới: Đưa cụm chuyển đổi chế độ Job Profile lên góc phải của `.panel-header`
+Đặt cụm hướng dẫn ngắn + nút chuyển đổi chế độ **cố định trên thanh tiêu đề `.panel-header`** của khu vực Job Profile (đồng bộ hoàn toàn với bố cục Header Trái – Nút Phải của `.cv-composer-header` và `.interview-header`):
+
+1. **Thanh tiêu đề `.panel-header` chia 2 bên cân đối (`display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap`)**:
+   - **Bên trái (`.panel-header-title`)**:
+     - Tiêu đề `<h2>Job Profile</h2>`.
+   - **Bên phải (`.panel-header-action`)**:
+     - Dòng gợi ý nhỏ `<span class="mode-switch-hint" id="job-mode-hint">Don't have a job description or link?</span>`
+     - Nút chuyển đổi `<button type="button" class="btn btn-secondary btn-sm" id="job-mode-switch-btn">Enter 4 fields manually</button>`
+2. **Trải nghiệm tương tác mượt mà & cố định vị trí**:
+   - Khi người dùng bấm nút `#job-mode-switch-btn` ngay trên góc phải `.panel-header`:
+     - Nút **đứng yên tại chỗ** (không bị nhảy lên/xuống theo chiều cao của form bên dưới).
+     - Chữ gợi ý và nhãn nút tự động đổi sang:
+       - Đang ở Paste Mode → `"Don't have a job description or link?"` + **`Enter 4 fields manually`**
+       - Đang ở Manual 4-Field Mode → `"Have a job description, HTML, or link?"` + **`Paste job description instead`**
+3. **Làm sạch khoảng cách giữa phần Job Profile và hộp CV**:
+   - Xóa bỏ hoàn toàn các khối `.job-mode-footer` nằm lơ lửng giữa phần Job Profile và hộp `.cv-unified-card`.
+   - Ô nhập Job Profile (`#job-paste-mode` hoặc `#job-manual-mode`) dẫn thẳng xuống hộp CV thống nhất bên dưới với khoảng cách thoáng đãng, tách bạch hoàn toàn 2 nút chức năng (1 nút ở Header trên cùng cho Job Profile, 1 nút nằm trong hộp CV bên dưới).
+
+---
+
+### 3. Danh sách file dự kiến cập nhật khi triển khai
+1. **`job-profile.html`**:
+   - Đưa `#job-mode-hint` và `#job-mode-switch-btn` vào bên phải của `<div class="panel-header">`.
+   - Xóa 2 khối `.job-mode-footer` bên dưới `#job-paste-mode` và `#job-manual-mode`.
+2. **`css/styles.css`**:
+   - Cập nhật `.panel-header` thành flex container (`display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap`) và thêm `.panel-header-action` (`display: flex; align-items: center; gap: 12px`).
+   - Dọn bỏ `.job-mode-footer` cũ.
+3. **`js/app.js`**:
+   - Cập nhật `setJobMode(mode)` để đổi trực tiếp nội dung của `#job-mode-hint` và `#job-mode-switch-btn` khi người dùng bấm chuyển đổi giữa `"paste"` và `"manual"`.
+
+### 4. Trạng thái
+- **DONE** — Đã triển khai và kiểm tra tĩnh.
+
+
+---
+
+## [DONE] Tinh chỉnh lại trang Job Profile (`job-profile.html`): Đổi nút chuyển 4 trường thành Hyperlink Text (kiểu Sign in / Sign up), đưa TOÀN BỘ phần CV (kể cả `Use my saved CV`) vào trong nút Extend `Use CV for this interview? ▾` & dùng lại hộp Upload PDF lớn kiểu cũ
+
+### 1. Phân tích yêu cầu điều chỉnh từ người dùng
+1. **Chuyển nút `Enter 4 fields manually` sang dạng Hyperlink Text (giống `Sign in` / `Sign up`)**:
+   - Thay vì dùng nút bấm đóng khung (`.btn.btn-secondary`), sử dụng câu dẫn ngắn kèm **chữ gạch chân tương tác (`.text-link`)** giống hệt mẫu `<p class="auth-switch">Don't have an account? <a class="text-link">Sign up</a></p>` trên trang đăng nhập.
+2. **Đưa TOÀN BỘ phần CV (bao gồm cả `Use my saved CV for this interview` lẫn phần Custom CV) vào bên trong một nút Extend duy nhất (`Use CV for this interview? ▾`)**:
+   - Khi mới vào trang `job-profile.html` (trạng thái thu gọn):
+     - Người dùng chỉ thấy phần **Job Profile** (ô dán JD + dòng hyperlink chuyển sang 4 trường) và ngay bên dưới là thanh mở rộng:
+       `──────────  Use CV for this interview? ▾  ──────────`
+     - Toàn bộ phần CV (kể cả hộp `Use my saved CV for this interview`) đều nằm gọn **bên trong** vùng mở rộng `#cv-extend-body` (ẩn khi chưa bấm mở rộng).
+   - Khi bấm vào **`Use CV for this interview? ▾`** (trạng thái mở rộng):
+     - Mở ra khung `#cv-extend-body` giữ nguyên bố cục hiện tại:
+       - **Chế độ Saved CV (`#cv-saved-mode`)**: Hộp `.cv-unified-card` chứa checkbox **`Use my saved CV for this interview`** bên trái và nút **`Paste raw CV or upload PDF`** bên phải.
+       - **Chế độ Custom CV (`#cv-custom-mode`)**: Khi bấm `Paste raw CV or upload PDF`, chuyển sang khung Custom CV có nút `Use saved CV instead` ở góc phải, bên dưới là ô dán **`Paste raw CV text`** (`#job-cv-raw`), vạch ngăn cách **`OR you can upload your CV`** (`.cv-or-divider`), và **hộp Upload PDF hình chữ nhật lớn kiểu cũ (`.cv-pdf-dropzone`)**.
+3. **Khôi phục hộp Upload PDF hình chữ nhật lớn kiểu cũ (`.cv-pdf-dropzone`)**:
+   - Trong `#cv-custom-mode`, thay thanh dock nhỏ ở đáy bằng **hộp chữ nhật lớn viền nét đứt kiểu cũ (`.cv-pdf-dropzone`)**: có icon SVG 40×40 ở giữa, tiêu đề `<h3>Upload your PDF Resume</h3>`, dòng chữ *"Drag and drop your file here, or browse from computer"* và *"Supports PDF only (up to 10MB)"* (hiển thị `.cv-pdf-card` khi đã đính kèm file).
+
+---
+
+### 2. Giải pháp thiết kế & Bố cục chi tiết trên `job-profile.html`
+
+#### A. Phần 1 — Job Profile + Dòng chuyển đổi Hyperlink Text (`.job-switch-prompt`)
+- **Tiêu đề Panel (`.panel-header`)**: Trả về tiêu đề sạch `<h2>Job Profile</h2>`.
+- **Khung nhập Job Profile (`#job-paste-mode` ↔ `#job-manual-mode`)**:
+  - **Mặc định (`#job-paste-mode`)**: Hiển thị ô `<textarea id="job-source" rows="5">` (*"Paste job description, HTML, or job link"*).
+  - **Chuyển sang 4 trường (`#job-manual-mode`)**: Hiển thị lưới 2×2 `.form-grid` gồm 4 trường (`Job title`, `Domain`, `Company`, `Position`).
+- **Dòng chuyển đổi dạng Hyperlink Text (`.job-switch-prompt`)** đặt gọn ngay dưới vùng nhập Job Profile:
+  ```html
+  <p class="job-switch-prompt">
+    <span id="job-mode-hint">Don't have a job description or link?</span>
+    <button type="button" class="text-link btn-link-inline" id="job-mode-switch-btn">Enter 4 fields manually</button>
+  </p>
+  ```
+
+#### B. Phần 2 — Toàn bộ khu vực CV nằm trong Nút Mở Rộng (`Use CV for this interview? ▾`)
+- Ngay dưới phần Job Profile là thanh mở rộng `.cv-extend-divider`:
+  ```html
+  <div class="cv-extend-divider">
+    <button type="button" class="cv-extend-trigger" id="cv-section-toggle" aria-expanded="false" aria-controls="cv-section-body">
+      <span>Use CV for this interview?</span>
+      <span class="expander-chevron" aria-hidden="true">▾</span>
+    </button>
+  </div>
+  ```
+- **Khối nội dung mở rộng `#cv-section-body` (Mặc định ẩn `.is-hidden`, chứa TOÀN BỘ phần CV với bố cục hiện tại)**:
+  1. **`#cv-saved-mode` (Giữ nguyên hộp `.cv-unified-card` hiện tại)**:
+     - Bên trái: Checkbox `Use my saved CV for this interview` (`#sync-cv`).
+     - Bên phải: Hint *"Want a custom CV?"* + nút **`Paste raw CV or upload PDF`** (`#switch-to-custom-cv`).
+  2. **`#cv-custom-mode` (Giữ bố cục chuyển đổi hiện tại + Khôi phục hộp `.cv-pdf-dropzone` hình chữ nhật lớn kiểu cũ)**:
+     - Thanh tiêu đề (`.cv-composer-header`): Tiêu đề **`Custom CV for this interview`** bên trái + nút **`Use saved CV instead`** (`#switch-to-saved-cv`) bên phải.
+     - Ô dán văn bản CV thuần: `<div class="field"><label for="job-cv-raw">Paste raw CV text</label><textarea id="job-cv-raw" rows="5" ...></textarea></div>`
+     - Vạch ngăn cách: `<div class="cv-or-divider"><span>OR you can upload your CV</span></div>`
+     - **Hộp Upload PDF hình chữ nhật lớn kiểu cũ (`.cv-pdf-dropzone` `#interview-pdf-dropzone`)** + thẻ `#interview-pdf-card` khi đã chọn file.
+
+---
+
+### 3. Danh sách file dự kiến cập nhật khi triển khai
+1. **`job-profile.html`**:
+   - Đổi nút chuyển đổi 4 trường sang dòng `<p class="job-switch-prompt">` dùng `.text-link` (kiểu Sign in / Sign up).
+   - Đặt thanh mở rộng `.cv-extend-divider` (`Use CV for this interview? ▾`) bao ngoài toàn bộ `#cv-section-body` (chứa cả `#cv-saved-mode` lẫn `#cv-custom-mode`).
+   - Trong `#cv-custom-mode`, khôi phục `.cv-or-divider` + hộp chữ nhật lớn `.cv-pdf-dropzone` kiểu cũ.
+2. **`css/styles.css`**:
+   - Thêm `.job-switch-prompt` và `.btn-link-inline` cho hyperlink text.
+   - Giữ style `.cv-unified-card` hiện tại và kết hợp hài hòa với `.cv-pdf-dropzone` lớn kiểu cũ trong `#cv-custom-mode`.
+3. **`js/app.js`**:
+   - Xử lý đóng/mở `#cv-section-toggle` (`#cv-section-body`).
+   - Giữ nguyên chuyển đổi `#cv-saved-mode` ↔ `#cv-custom-mode` bên trong `#cv-section-body` và khôi phục sự kiện click/drag-drop trên `#interview-pdf-dropzone`.
+
+### 4. Trạng thái
+- **DONE** — Đã hoàn thành triển khai và kiểm tra trên `job-profile.html`, `css/styles.css` và `js/app.js`.
+
+---
+
+## [DONE] Đồng bộ mục "Your CV" trên trang Profile (`profile.html`): Bỏ 4 mục CV rời, thay bằng ô dán văn bản CV thuần (`Paste raw CV text`) giống trang Job Profile
+
+### 1. Vấn đề hiện tại
+- Trên trang `job-profile.html`, phần nhập CV đã được tối giản thành **1 ô dán văn bản thuần (`Paste raw CV text`)** kết hợp với hộp tải file PDF (`.cv-pdf-dropzone`).
+- Tuy nhiên, tại mục **Your CV** (`#your-cv`) trên trang `profile.html`, giao diện vẫn đang hiển thị **4 mục tách rời** (`01 Personal Profile`, `02 Education History`, `03 Work & Research Experience`, `04 Core Skills`), gây thiếu đồng bộ trải nghiệm và buộc người dùng phải chia nhỏ CV thủ công khi lưu CV mặc định trong tài khoản.
+
+---
+
+### 2. Giải pháp đề xuất
+
+#### A. Giao diện mục `Your CV` trên `profile.html` (`#your-cv`)
+1. **Xóa 4 thẻ `.cv-section-card` trong `.profile-cv-stack`** (`#prof-cv-0`, `#prof-cv-1`, `#prof-cv-2`, `#prof-cv-3`).
+2. **Thay bằng 1 ô dán văn bản CV thuần (`#prof-cv-raw`)** đồng bộ hoàn toàn với phần Custom CV trên `job-profile.html`:
+   ```html
+   <div class="field cv-raw-field">
+     <label for="prof-cv-raw">Paste raw CV text</label>
+     <textarea id="prof-cv-raw" rows="6" maxlength="15000" placeholder="Paste your raw resume, CV text, or background summary here..."></textarea>
+   </div>
+   ```
+3. **Giữ nguyên phần tải PDF và thanh nút lưu bên dưới**:
+   - Vạch ngăn cách `.cv-or-divider` (`OR you can upload your CV`).
+   - Hộp kéo thả PDF hình chữ nhật lớn `.cv-pdf-dropzone` (`#cv-pdf-dropzone`) và thẻ hiển thị file đính kèm `.cv-pdf-card` (`#cv-pdf-card`).
+   - Thanh hành động `.cv-actions-bar` với thông báo trạng thái `#cv-status` và nút **`Save CV`** (`#save-cv-btn`).
+
+#### B. Logic lưu trữ & tương thích dữ liệu trong `js/app.js`
+1. **Hiển thị dữ liệu CV đã lưu vào `#prof-cv-raw`**:
+   - Nếu tài khoản đang ở chế độ văn bản (`!isPdfActive`), ghép các phần tử có nội dung trong `account.cv` (`account.cv.filter(s => s && s.trim()).join("\n\n")`) để hiển thị đầy đủ trong `#prof-cv-raw` (tương thích mượt với cả dữ liệu mẫu 4 phần trong `DATA.cv` lẫn dữ liệu 1 chuỗi mới).
+2. **Lưu trữ tương thích với `validState` (`strings(account.cv, 4)`)**:
+   - Cập nhật hàm `saveCV()` để lưu giá trị của `#prof-cv-raw` vào `account.cv = [profCvRaw.value, "", "", ""]`, đảm bảo cấu trúc mảng 4 chuỗi trong `localStorage` luôn hợp lệ và không làm hỏng dữ liệu cũ.
+3. **Loại trừ lẫn nhau giữa Raw Text và PDF**:
+   - Khi người dùng gõ vào `#prof-cv-raw` hoặc bấm `Save CV`: tự động xóa trạng thái PDF (`clearPdfFile()`), lưu văn bản vào `account.cv` và hiện `"Changes saved."` / `"CV saved successfully."`.
+   - Khi người dùng tải lên file PDF (`handlePdfFile`): xóa trắng `#prof-cv-raw` (`clearCvSections()`), lưu metadata PDF vào `account.cvPdf` (`account.cvMode = "pdf"`) và hiển thị thông báo ``PDF "${file.name}" saved! Raw text cleared.``.
+
+---
+
+### 3. Danh sách file dự kiến cập nhật khi triển khai
+1. **`profile.html`**:
+   - Thay khối `.profile-cv-stack` (4 mục `#prof-cv-0..3`) bằng `.field.cv-raw-field` chứa `<textarea id="prof-cv-raw">`.
+2. **`js/app.js`**:
+   - Cập nhật `saveCV()`, `clearCvSections()`, và sự kiện khởi tạo/nhập liệu của `#prof-cv-raw` trong khối `if (page === "profile")`.
+3. **`css/styles.css`**:
+   - Tái sử dụng trực tiếp class `.cv-raw-field` đã định nghĩa cho `job-profile.html` (không cần thêm CSS dư thừa).
+
+### 4. Trạng thái
+- **DONE** — Đã hoàn thành triển khai: ô dán CV thuần trên Profile và `account.cv` mặc định để trống (blank) thay vì nạp sẵn dữ liệu mẫu `DATA.cv`.

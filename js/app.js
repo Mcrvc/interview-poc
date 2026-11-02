@@ -7,7 +7,8 @@
   const $ = selector => document.querySelector(selector);
   const $$ = selector => [...document.querySelectorAll(selector)];
   const page = document.body.dataset.page;
-  const jobKeys = ["job-title", "domain", "company", "position", "job-url"];
+  const jobKeys = ["job-source", "job-title", "domain", "company", "position"];
+  const manualJobKeys = ["job-title", "domain", "company", "position"];
   const strings = (value, length) => Array.isArray(value) && value.length === length && value.every(item => typeof item === "string");
   const identity = name => name.trim().toLocaleLowerCase();
   const go = url => { window.location.href = url; };
@@ -16,7 +17,7 @@
     return {
       username,
       password: "123",
-      cv: [...DATA.cv],
+      cv: ["", "", "", ""],
       job: {},
       syncCV: true,
       activeId: null,
@@ -120,14 +121,25 @@
     return item;
   }
   function saveJob() {
-    account.job = Object.fromEntries(jobKeys.map(key => [key, $("#" + key).value.trim()]));
+    account.job = Object.fromEntries(jobKeys.map(key => {
+      const el = $("#" + key);
+      return [key, el ? el.value.trim() : (account.job && account.job[key] ? account.job[key] : "")];
+    }));
     const syncCvCheckbox = $("#sync-cv");
     account.syncCV = syncCvCheckbox ? syncCvCheckbox.checked : account.syncCV !== false;
     account.cvSource = account.syncCV ? "saved" : "none";
     save();
   }
   function saveCV() {
-    account.cv = $$("[data-cv]").map(input => input.value);
+    const profCvRaw = $("#prof-cv-raw");
+    if (profCvRaw) {
+      account.cv = [profCvRaw.value.trim(), "", "", ""];
+    } else {
+      const cvInputs = $$("[data-cv]");
+      if (cvInputs.length) {
+        account.cv = cvInputs.map(input => input.value);
+      }
+    }
     save();
   }
   function saveAnswer() {
@@ -265,17 +277,18 @@
     const pdfFileName = $("#pdf-file-name");
     const pdfFileSize = $("#pdf-file-size");
     const pdfFileDate = $("#pdf-file-date");
+    const profCvRawInput = $("#prof-cv-raw");
 
-    // Helper to clear 4 CV text sections when user chooses PDF input
+    // Helper to clear raw CV text when user chooses PDF input
     function clearCvSections() {
-      $$("[data-cv]").forEach(textarea => { textarea.value = ""; });
+      if (profCvRawInput) profCvRawInput.value = "";
       account.cv = ["", "", "", ""];
       account.cvMode = "pdf";
       save();
       if (cvStatus) cvStatus.textContent = "";
     }
 
-    // Helper to clear PDF when user types in 4 CV text sections
+    // Helper to clear PDF when user types in raw CV text
     function clearPdfFile() {
       if (account.cvPdf) {
         account.cvPdf = null;
@@ -287,16 +300,22 @@
       }
     }
 
-    // Populate 4 CV Textareas (cleared if account has active PDF CV)
+    // Clear legacy sample text from DATA.cv so profile starts blank by default
+    if (Array.isArray(account.cv) && DATA.cv && JSON.stringify(account.cv) === JSON.stringify(DATA.cv)) {
+      account.cv = ["", "", "", ""];
+      save();
+    }
+
+    // Populate Raw CV Textarea (cleared if account has active PDF CV)
     const isPdfActive = Boolean(account.cvPdf || account.cvMode === "pdf");
-    $$("[data-cv]").forEach((textarea, index) => {
-      textarea.value = isPdfActive ? "" : (account.cv[index] || "");
-      textarea.addEventListener("input", () => {
+    if (profCvRawInput) {
+      profCvRawInput.value = isPdfActive ? "" : account.cv.filter(s => typeof s === "string" && s.trim()).join("\n\n");
+      profCvRawInput.addEventListener("input", () => {
         clearPdfFile();
         saveCV();
         cvStatus.textContent = "Changes saved.";
       });
-    });
+    }
 
     $("#save-cv-btn").addEventListener("click", () => {
       clearPdfFile();
@@ -341,7 +360,7 @@
       account.cvMode = "pdf";
       save();
       renderPdfState();
-      pdfStatus.textContent = `PDF "${file.name}" saved! 4 sections cleared.`;
+      pdfStatus.textContent = `PDF "${file.name}" saved! Raw text cleared.`;
     }
 
     $("#browse-pdf-btn").addEventListener("click", (e) => {
@@ -395,49 +414,118 @@
   }
 
   if (page === "job-profile") {
-    jobKeys.forEach(key => {
-      const input = $("#" + key);
-      input.value = typeof account.job[key] === "string" ? account.job[key] : "";
-      input.addEventListener("input", saveJob);
-    });
-    const syncCvCheckbox = $("#sync-cv");
-    const customCvBody = $("#custom-cv-body");
-    syncCvCheckbox.checked = account.syncCV !== false;
-    syncCvCheckbox.addEventListener("change", saveJob);
-    let isExpanderOpen = false;
-    const customCvToggle = $("#custom-cv-toggle");
-    customCvToggle.addEventListener("click", () => {
-      isExpanderOpen = !isExpanderOpen;
-      customCvToggle.classList.toggle("is-open", isExpanderOpen);
-      customCvBody.classList.toggle("is-hidden", !isExpanderOpen);
-      customCvBody.setAttribute("aria-hidden", String(!isExpanderOpen));
-      customCvToggle.setAttribute("aria-expanded", String(isExpanderOpen));
-    });
-
-    // Helpers for mutual exclusivity between custom CV 4-sections and custom PDF
-    function clearCustomCvSections() {
-      customCvInputs.forEach(input => { input.value = ""; });
+    // Migrate legacy job-url to job-source if needed
+    if (!account.job["job-source"] && typeof account.job["job-url"] === "string" && account.job["job-url"].trim()) {
+      account.job["job-source"] = account.job["job-url"].trim();
     }
 
-    function clearCustomInterviewPdf() {
-      if (interviewPdf) {
-        interviewPdf = null;
-        if (interviewPdfInput) interviewPdfInput.value = "";
-        interviewPdfDropzone.classList.remove("is-hidden");
-        interviewPdfCard.classList.add("is-hidden");
-        interviewPdfStatus.textContent = "";
+    jobKeys.forEach(key => {
+      const input = $("#" + key);
+      if (!input) return;
+      input.value = typeof account.job[key] === "string" ? account.job[key] : "";
+      input.addEventListener("input", () => {
+        const jobError = $("#job-error");
+        if (jobError) jobError.hidden = true;
+        saveJob();
+      });
+    });
+
+    // 1. Job Profile Mode Switching (Paste vs Manual) anchored in .panel-header
+    const jobPasteMode = $("#job-paste-mode");
+    const jobManualMode = $("#job-manual-mode");
+    const jobModeSwitchBtn = $("#job-mode-switch-btn");
+    const jobModeHint = $("#job-mode-hint");
+    let jobInputMode = "paste";
+
+    function setJobMode(mode) {
+      jobInputMode = mode;
+      const jobError = $("#job-error");
+      if (jobError) jobError.hidden = true;
+      if (mode === "manual") {
+        jobPasteMode.classList.add("is-hidden");
+        jobManualMode.classList.remove("is-hidden");
+        if (jobModeHint) jobModeHint.textContent = "Have a job description, HTML, or link?";
+        if (jobModeSwitchBtn) jobModeSwitchBtn.textContent = "Paste job description instead";
+      } else {
+        jobManualMode.classList.add("is-hidden");
+        jobPasteMode.classList.remove("is-hidden");
+        if (jobModeHint) jobModeHint.textContent = "Don't have a job description or link?";
+        if (jobModeSwitchBtn) jobModeSwitchBtn.textContent = "Enter 4 fields manually";
       }
     }
 
-    // Prefill custom CV textareas with account CV if not in PDF mode
-    const customCvInputs = $$("[data-job-cv]");
-    const isProfilePdf = Boolean(account.cvPdf || account.cvMode === "pdf");
-    customCvInputs.forEach((textarea, index) => {
-      textarea.value = isProfilePdf ? "" : (account.cv[index] || "");
-      textarea.addEventListener("input", clearCustomInterviewPdf);
-    });
+    if (jobModeSwitchBtn) {
+      jobModeSwitchBtn.addEventListener("click", () => {
+        setJobMode(jobInputMode === "paste" ? "manual" : "paste");
+      });
+    }
 
-    // Custom PDF Upload handling for this interview
+    // If previously saved state has manual fields but no job-source, show manual mode by default
+    if (!account.job["job-source"] && manualJobKeys.some(key => Boolean(account.job[key]))) {
+      setJobMode("manual");
+    }
+
+    // 2. CV Section Extend Toggle ("Use CV for this interview?")
+    const cvSectionToggle = $("#cv-section-toggle");
+    const cvSectionBody = $("#cv-section-body");
+    let isCvOpen = false;
+
+    function setCvSectionOpen(open) {
+      isCvOpen = open;
+      if (open) {
+        cvSectionBody.classList.remove("is-hidden");
+        cvSectionBody.setAttribute("aria-hidden", "false");
+        cvSectionToggle.setAttribute("aria-expanded", "true");
+        cvSectionToggle.classList.add("is-open");
+      } else {
+        cvSectionBody.classList.add("is-hidden");
+        cvSectionBody.setAttribute("aria-hidden", "true");
+        cvSectionToggle.setAttribute("aria-expanded", "false");
+        cvSectionToggle.classList.remove("is-open");
+      }
+    }
+
+    if (cvSectionToggle) {
+      cvSectionToggle.addEventListener("click", () => {
+        setCvSectionOpen(!isCvOpen);
+      });
+    }
+
+    // 3. CV Mode Switching inside CV Section (Saved vs Custom)
+    const cvSavedMode = $("#cv-saved-mode");
+    const cvCustomMode = $("#cv-custom-mode");
+    const switchToCustomCvBtn = $("#switch-to-custom-cv");
+    const switchToSavedCvBtn = $("#switch-to-saved-cv");
+    const syncCvCheckbox = $("#sync-cv");
+    const jobCvRawInput = $("#job-cv-raw");
+    let cvInputMode = "saved";
+
+    if (syncCvCheckbox) {
+      syncCvCheckbox.checked = account.syncCV !== false;
+      syncCvCheckbox.addEventListener("change", saveJob);
+    }
+
+    function setCvMode(mode) {
+      cvInputMode = mode;
+      const jobError = $("#job-error");
+      if (jobError) jobError.hidden = true;
+      if (mode === "custom") {
+        cvSavedMode.classList.add("is-hidden");
+        cvCustomMode.classList.remove("is-hidden");
+      } else {
+        cvCustomMode.classList.add("is-hidden");
+        cvSavedMode.classList.remove("is-hidden");
+      }
+    }
+
+    if (switchToCustomCvBtn) {
+      switchToCustomCvBtn.addEventListener("click", () => setCvMode("custom"));
+    }
+    if (switchToSavedCvBtn) {
+      switchToSavedCvBtn.addEventListener("click", () => setCvMode("saved"));
+    }
+
+    // 4. Custom PDF Upload handling for this interview (Old style dropzone + card)
     let interviewPdf = null;
     const interviewPdfDropzone = $("#interview-pdf-dropzone");
     const interviewPdfInput = $("#interview-pdf-input");
@@ -446,98 +534,137 @@
     const interviewPdfSize = $("#interview-pdf-size");
     const interviewPdfStatus = $("#interview-pdf-status");
 
+    function clearCustomInterviewPdf() {
+      if (interviewPdf) {
+        interviewPdf = null;
+        if (interviewPdfInput) interviewPdfInput.value = "";
+        if (interviewPdfCard) interviewPdfCard.classList.add("is-hidden");
+        if (interviewPdfDropzone) interviewPdfDropzone.classList.remove("is-hidden");
+        if (interviewPdfStatus) interviewPdfStatus.textContent = "";
+      }
+    }
+
+    if (jobCvRawInput) {
+      jobCvRawInput.addEventListener("input", () => {
+        clearCustomInterviewPdf();
+      });
+    }
+
     function handleInterviewPdf(file) {
       if (!file) return;
       if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
-        interviewPdfStatus.textContent = "Please upload a valid PDF file (.pdf).";
+        if (interviewPdfStatus) interviewPdfStatus.textContent = "Please upload a valid PDF file (.pdf).";
         return;
       }
-      clearCustomCvSections();
+      if (jobCvRawInput) {
+        jobCvRawInput.value = "";
+      }
       const sizeStr = file.size > 1024 * 1024
         ? (file.size / (1024 * 1024)).toFixed(1) + " MB"
         : Math.round(file.size / 1024) + " KB";
 
       interviewPdf = { name: file.name, size: sizeStr };
-      interviewPdfDropzone.classList.add("is-hidden");
-      interviewPdfCard.classList.remove("is-hidden");
-      interviewPdfName.textContent = file.name;
-      interviewPdfSize.textContent = sizeStr;
-      interviewPdfStatus.textContent = `Attached "${file.name}" to this interview. 4 sections cleared.`;
+      if (interviewPdfDropzone) interviewPdfDropzone.classList.add("is-hidden");
+      if (interviewPdfCard) interviewPdfCard.classList.remove("is-hidden");
+      if (interviewPdfName) interviewPdfName.textContent = file.name;
+      if (interviewPdfSize) interviewPdfSize.textContent = sizeStr;
+      if (interviewPdfStatus) interviewPdfStatus.textContent = `Attached "${file.name}" to this interview.`;
     }
 
-    $("#interview-browse-pdf-btn").addEventListener("click", (e) => {
-      e.stopPropagation();
-      clearCustomCvSections();
-      interviewPdfInput.click();
-    });
-    interviewPdfDropzone.addEventListener("click", () => {
-      clearCustomCvSections();
-      interviewPdfInput.click();
-    });
-    interviewPdfInput.addEventListener("change", () => {
-      if (interviewPdfInput.files && interviewPdfInput.files[0]) {
-        handleInterviewPdf(interviewPdfInput.files[0]);
-      }
-    });
-
-    // Drag & Drop
-    ["dragenter", "dragover"].forEach(eventName => {
-      interviewPdfDropzone.addEventListener(eventName, e => {
-        e.preventDefault();
-        e.stopPropagation();
-        interviewPdfDropzone.classList.add("drag-over");
+    if (interviewPdfDropzone) {
+      interviewPdfDropzone.addEventListener("click", () => {
+        if (interviewPdfInput) interviewPdfInput.click();
       });
-    });
-    ["dragleave", "drop"].forEach(eventName => {
-      interviewPdfDropzone.addEventListener(eventName, e => {
-        e.preventDefault();
-        e.stopPropagation();
-        interviewPdfDropzone.classList.remove("drag-over");
+      interviewPdfDropzone.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          if (interviewPdfInput) interviewPdfInput.click();
+        }
       });
-    });
-    interviewPdfDropzone.addEventListener("drop", e => {
-      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
-        handleInterviewPdf(e.dataTransfer.files[0]);
-      }
-    });
+      ["dragenter", "dragover"].forEach(eventName => {
+        interviewPdfDropzone.addEventListener(eventName, e => {
+          e.preventDefault();
+          e.stopPropagation();
+          interviewPdfDropzone.classList.add("drag-over");
+        });
+      });
+      ["dragleave", "drop"].forEach(eventName => {
+        interviewPdfDropzone.addEventListener(eventName, e => {
+          e.preventDefault();
+          e.stopPropagation();
+          interviewPdfDropzone.classList.remove("drag-over");
+        });
+      });
+      interviewPdfDropzone.addEventListener("drop", e => {
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+          handleInterviewPdf(e.dataTransfer.files[0]);
+        }
+      });
+    }
 
-    $("#interview-replace-pdf-btn").addEventListener("click", () => {
-      clearCustomCvSections();
-      interviewPdfInput.click();
-    });
-    $("#interview-remove-pdf-btn").addEventListener("click", () => {
-      interviewPdf = null;
-      interviewPdfDropzone.classList.remove("is-hidden");
-      interviewPdfCard.classList.add("is-hidden");
-      interviewPdfStatus.textContent = "";
-    });
+    const interviewBrowseBtn = $("#interview-browse-pdf-btn");
+    if (interviewBrowseBtn) {
+      interviewBrowseBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (interviewPdfInput) interviewPdfInput.click();
+      });
+    }
+
+    if (interviewPdfInput) {
+      interviewPdfInput.addEventListener("change", () => {
+        if (interviewPdfInput.files && interviewPdfInput.files[0]) {
+          handleInterviewPdf(interviewPdfInput.files[0]);
+        }
+      });
+    }
+
+    const interviewReplaceBtn = $("#interview-replace-pdf-btn");
+    if (interviewReplaceBtn) {
+      interviewReplaceBtn.addEventListener("click", () => {
+        if (interviewPdfInput) interviewPdfInput.click();
+      });
+    }
+
+    const interviewRemoveBtn = $("#interview-remove-pdf-btn");
+    if (interviewRemoveBtn) {
+      interviewRemoveBtn.addEventListener("click", () => {
+        clearCustomInterviewPdf();
+        if (jobCvRawInput) {
+          jobCvRawInput.value = "";
+          jobCvRawInput.focus();
+        }
+      });
+    }
 
     $("#job-form").addEventListener("submit", event => {
       event.preventDefault();
+      const jobError = $("#job-error");
+      if (jobError) jobError.hidden = true;
       saveJob();
-      if (jobKeys.slice(0, 4).some(key => !account.job[key])) {
-        return error("#job-error", "Enter a value for each job profile field.");
-      }
-      if (account.job["job-url"]) {
-        try {
-          const url = new URL(account.job["job-url"]);
-          if (!["http:", "https:"].includes(url.protocol)) throw new Error("Unsupported protocol");
-        } catch (_) {
-          return error("#job-error", "Use a complete http:// or https:// job description link.");
+
+      if (jobInputMode === "paste") {
+        if (!account.job["job-source"]) {
+          return error("#job-error", "Paste a job description, HTML, or job link, or click 'Enter 4 fields manually'.");
+        }
+      } else {
+        if (manualJobKeys.some(key => !account.job[key])) {
+          return error("#job-error", "Enter a value for each of the 4 job profile fields.");
         }
       }
 
-      if (isExpanderOpen) {
+      if (!isCvOpen) {
+        startInterview(null, null, "none");
+      } else if (cvInputMode === "custom") {
         if (interviewPdf) {
           startInterview(["", "", "", ""], interviewPdf, "custom");
         } else {
-          const customCV = customCvInputs.map(input => input.value);
-          if (!customCV.some(text => text.trim())) {
-            return error("#job-error", "Add custom CV content or choose No CV to continue without a CV.");
+          const rawText = jobCvRawInput ? jobCvRawInput.value.trim() : "";
+          if (!rawText) {
+            return error("#job-error", "Paste your CV text or upload a PDF resume, or switch back to saved CV.");
           }
-          startInterview(customCV, null, "custom");
+          startInterview([rawText, "", "", ""], null, "custom");
         }
-      } else if (syncCvCheckbox.checked) {
+      } else if (syncCvCheckbox && syncCvCheckbox.checked) {
         if (account.cvPdf || account.cvMode === "pdf") {
           startInterview(["", "", "", ""], account.cvPdf, "saved");
         } else {

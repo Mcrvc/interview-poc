@@ -27,6 +27,15 @@
         <img class="header-avatar" src="assets/avatar.svg" alt="">
         <span class="profile-name" data-username>Eric Arthur Blair</span>
       </a>
+      <span class="header-divider" aria-hidden="true"></span>
+      <a class="header-logout-link" href="sign-in.html" data-sign-out aria-label="Sign out" title="Sign out">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span class="logout-text">Sign out</span>
+      </a>
     </div>
   </nav>
 </header>
@@ -53,10 +62,30 @@
       <!-- Mode 2: Enter 4 Fields Manually (Hidden by default) -->
       <div id="job-manual-mode" class="is-hidden">
         <div class="form-grid manual-job-body">
-          <div class="field"><label for="job-title">Job title</label><input id="job-title" type="text" placeholder="Enter job title" maxlength="180" data-job></div>
-          <div class="field"><label for="domain">Domain</label><input id="domain" type="text" placeholder="Enter domain" maxlength="180" data-job></div>
-          <div class="field"><label for="company">Company</label><input id="company" type="text" placeholder="Enter company" maxlength="180" data-job></div>
-          <div class="field"><label for="position">Position</label><input id="position" type="text" placeholder="Enter position" maxlength="180" data-job></div>
+          <div class="field">
+            <label for="job-title">Job title</label>
+            <input id="job-title" name="job-title" type="text" placeholder="e.g., Data Engineer" maxlength="180" data-job>
+          </div>
+          <div class="field">
+            <label for="domain">Domain</label>
+            <input id="domain" name="domain" type="text" placeholder="e.g., FinTech, E-Commerce" maxlength="180" data-job>
+          </div>
+          <div class="field">
+            <label for="company">Company</label>
+            <input id="company" name="company" type="text" placeholder="e.g., Shopee" maxlength="180" data-job>
+          </div>
+          <div class="field">
+            <label for="position">Seniority / Level</label>
+            <input id="position" name="position" type="text" placeholder="e.g., Intern, Junior, Senior" maxlength="180" data-job list="seniority-suggestions">
+            <datalist id="seniority-suggestions">
+              <option value="Intern">
+              <option value="Fresher / Entry-level">
+              <option value="Junior">
+              <option value="Mid-level">
+              <option value="Senior">
+              <option value="Lead / Principal">
+            </datalist>
+          </div>
         </div>
       </div>
     </div>

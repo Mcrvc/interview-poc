@@ -169,13 +169,36 @@
     save();
   }));
 
-  const authForm = $("#auth-form");
-  if (authForm) {
+  // Toggle password visibility (show/hide)
+  $$("[data-toggle-password]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const targetId = btn.dataset.togglePassword;
+      const input = $("#" + targetId);
+      if (!input) return;
+      const isPassword = input.type === "password";
+      input.type = isPassword ? "text" : "password";
+      btn.setAttribute("aria-label", isPassword ? "Hide password" : "Show password");
+      btn.setAttribute("aria-pressed", isPassword ? "true" : "false");
+      btn.setAttribute("title", isPassword ? "Hide password" : "Show password");
+      const eyeShow = btn.querySelector(".eye-show");
+      const eyeHide = btn.querySelector(".eye-hide");
+      if (eyeShow && eyeHide) {
+        eyeShow.classList.toggle("is-hidden", isPassword);
+        eyeHide.classList.toggle("is-hidden", !isPassword);
+      }
+    });
+  });
+
+  const authForms = $$("#auth-form, #sign-in-form, #sign-up-form, .auth-form");
+  authForms.forEach(authForm => {
     authForm.addEventListener("submit", event => {
       event.preventDefault();
-      const username = $("#username").value.trim();
+      const usernameInput = $("#username");
+      const username = usernameInput ? usernameInput.value.trim() : "";
       if (!username) return error("#auth-error", "Enter a username to continue.");
-      if (page === "sign-up" && $("#password").value !== $("#confirm-password").value) {
+      const passwordInput = $("#password");
+      const confirmInput = $("#confirm-password");
+      if (page === "sign-up" && passwordInput && confirmInput && passwordInput.value !== confirmInput.value) {
         return error("#auth-error", "Passwords do not match.");
       }
       const existing = state.accounts.find(item => identity(item.username) === identity(username));
@@ -188,7 +211,7 @@
       save();
       go("dashboard.html");
     });
-  }
+  });
 
   $$("[data-new-interview]").forEach(link => link.addEventListener("click", () => {
     account.activeId = null;
@@ -1100,6 +1123,21 @@
         element.textContent = interview.answers[index] || "No answer provided.";
       });
 
+      // Retake interview button: creates a fresh interview with the same CV and Job profile
+      const retakeBtn = $("#retake-interview-btn");
+      if (retakeBtn) {
+        retakeBtn.addEventListener("click", event => {
+          event.preventDefault();
+          const newInt = startInterview(
+            interview.cv,
+            interview.cvPdf,
+            interview.cvMode === "pdf" ? "saved" : (interview.cv && interview.cv.some(s => s && s.trim()) ? "custom" : "none")
+          );
+          if (interview.job) newInt.job = { ...interview.job };
+          save();
+          go("interview.html");
+        });
+      }
     }
   }
   if (page === "system-feedback") {

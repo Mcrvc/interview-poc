@@ -1397,3 +1397,265 @@ Thiết kế vector 2D sắc nét, thân thiện và đồng bộ 100% với b�
 
 ### 3. Trạng thái
 - **DONE** — Đã hoàn thành triển khai và kiểm tra cấu trúc HTML/CSS/SVG.
+
+---
+
+## [DONE] Cải thiện UX/UI & Chuẩn hóa Form theo Feedback của Teammate (Sign In/Up, Header, Job Profile, Report)
+
+### 1. Tổng hợp & Phân tích các điểm Feedback từ Teammate
+
+| Khu vực | Vấn đề hiện tại | Đề xuất cải thiện từ Teammate |
+| --- | --- | --- |
+| **Sign In / Sign Up** (`sign-in.html`, `sign-up.html`) | 1. Không có nút ẩn/hiện mật khẩu.<br>2. Tiêu đề `<h2>Log in into your account</h2>` sai ngữ pháp (`into`) và lệch thuật ngữ với tab/nút `Sign in`.<br>3. Câu chuyển trang `Dont have an account?, Sign up` thiếu dấu nháy đơn và thừa dấu phẩy.<br>4. Các thẻ `<input>` chỉ có `id`, thiếu thuộc tính `name`.<br>5. Ô mật khẩu để `autocomplete="off"`. | 1. Thêm nút con mắt ẩn/hiện password.<br>2. Đổi thành `Sign in to your account` (đồng bộ với tab & nút `Sign in`).<br>3. Đổi thành `Don't have an account? Sign up.` (và đồng bộ bên `sign-up.html`).<br>4. Bổ sung `name="username"`, `name="password"` (và `name="confirm-password"`).<br>5. Đổi thành `autocomplete="current-password"` (và `new-password` ở trang đăng ký). |
+| **Header toàn trang** (`.site-header` trên 9 trang) | Thiếu nút Đăng xuất (`Sign out` / `Log out`) nhanh trên Header; người dùng phải vào trang Profile mới đăng xuất được. | Bổ sung nút `Sign out` nhanh ở khu vực `.header-right`, nằm ngay bên phải cụm Avatar & Tên người dùng. |
+| **Job Profile** (`job-profile.html`) | 1. Nhãn `Position` dễ bị hiểu trùng nghĩa với `Job title`.<br>2. Placeholder `Enter job title`, `Enter domain`... lặp lại nhãn, thiếu tính gợi ý.<br>3. Nút mở rộng `USE CV FOR THIS INTERVIEW? ▾` chỉ là chữ xám nhỏ giữa 2 gạch ngang, dễ bị nhầm là đường phân cách tĩnh. | 1. Đổi nhãn `Position` thành `Seniority / Level` (kèm ví dụ hoặc menu `<select>`).<br>2. Đổi Placeholder sang ví dụ cụ thể (`e.g., Data Engineer`, `e.g., FinTech`, `e.g., Shopee`, `e.g., Junior`).<br>3. Đổi màu chữ nút mở rộng CV sang xanh cổ vịt đậm, thêm viền nút bấm (pill button) nổi bật để nhận diện rõ là nút tương tác. |
+| **Report** (`report.html`) | 1. Hộp `Our Feedback` chỉ có chữ thuần, khó nắm bắt nhanh mức độ đạt của từng câu trả lời.<br>2. Cuối trang báo cáo chưa có nút hành động tiếp theo (Next steps). | 1. Gắn thêm một badge nhỏ ở góc hộp `Our Feedback` (`Good` / `Needs Improvement`).<br>2. Thêm 2 nút ở cuối trang: **`Retake interview`** (khép kín vòng lặp luyện tập) và **`Rate this feedback →`** dẫn sang `system-feedback.html`. |
+
+---
+
+### 2. Giải pháp Thiết kế & Kỹ thuật Chi tiết
+
+#### A. Trang Đăng nhập & Đăng ký (`sign-in.html`, `sign-up.html`, `css/styles.css`, `js/app.js`)
+
+1. **Đồng bộ thuật ngữ & Chuẩn hóa câu chữ**:
+   - Trên [`sign-in.html`](file:///c:/Users/Mavc/Desktop/interview-poc/interview-poc/sign-in.html):
+     - Đổi `<h2>Log in into your account</h2>` → **`<h2>Sign in to your account</h2>`**.
+     - Đổi `<p class="auth-switch">Dont have an account?, <a class="text-link" href="sign-up.html">Sign up</a></p>` → **`<p class="auth-switch">Don't have an account? <a class="text-link" href="sign-up.html">Sign up</a>.</p>`**
+   - Trên [`sign-up.html`](file:///c:/Users/Mavc/Desktop/interview-poc/interview-poc/sign-up.html):
+     - Đổi `<p class="auth-switch">Already have an account?, <a class="text-link" href="sign-in.html">Sign in</a></p>` → **`<p class="auth-switch">Already have an account? <a class="text-link" href="sign-in.html">Sign in</a>.</p>`**
+
+2. **Chuẩn hóa thuộc tính HTML (`name` & `autocomplete`)**:
+   - Trên [`sign-in.html`](file:///c:/Users/Mavc/Desktop/interview-poc/interview-poc/sign-in.html):
+     - `#username`: bổ sung `name="username"`, `type="text"`, giữ `autocomplete="username"`.
+     - `#password`: bổ sung `name="password"`, đổi `autocomplete="off"` thành **`autocomplete="current-password"`**.
+   - Trên [`sign-up.html`](file:///c:/Users/Mavc/Desktop/interview-poc/interview-poc/sign-up.html):
+     - `#username`: bổ sung `name="username"`, giữ `autocomplete="username"`.
+     - `#password`: bổ sung `name="password"`, đổi `autocomplete="off"` thành **`autocomplete="new-password"`**.
+     - `#confirm-password`: bổ sung `name="confirm-password"`, đổi `autocomplete="off"` thành **`autocomplete="new-password"`**.
+   - Đồng bộ selector xử lý submit form trong [`js/app.js`](file:///c:/Users/Mavc/Desktop/interview-poc/interview-poc/js/app.js) (`const authForm = $("#auth-form, #sign-in-form, #sign-up-form");`) để đảm bảo sự kiện submit luôn bắt đúng cả 2 form.
+
+3. **Bổ sung nút Ẩn / Hiện Mật khẩu (Show/Hide Password Button)**:
+   - Bọc các ô `<input type="password">` trong `<div class="password-input-wrap">`:
+     ```html
+     <div class="password-input-wrap">
+       <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Password" value="demo1234" required>
+       <button type="button" class="password-toggle-btn" data-toggle-password="password" aria-label="Show password" aria-pressed="false">
+         <!-- SVG Eye / Eye-Off Icon -->
+       </button>
+     </div>
+     ```
+   - **Style (`.password-input-wrap` & `.password-toggle-btn`)**:
+     - `.password-input-wrap { position: relative; display: flex; align-items: center; }`
+     - Ô input có `padding-right: 44px;` để chữ không đè lên icon.
+     - Nút `.password-toggle-btn` đặt tuyệt đối ở bên phải (`right: 8px`), kích thước `32px × 32px`, bo góc tròn nhẹ, màu `var(--muted)`, khi hover/active chuyển sang xanh cổ vịt `var(--ink)`.
+   - **Logic trong `js/app.js`**:
+     - Lắng nghe sự kiện click trên `$$("[data-toggle-password]")`: chuyển đổi `input.type` giữa `"password"` và `"text"`, cập nhật `aria-label` (`"Show password"` ↔ `"Hide password"`), `aria-pressed`, và đổi icon mắt mở ↔ mắt gạch chéo.
+
+---
+
+#### B. Bổ sung Nút Đăng xuất Nhanh trên Header Toàn Trang (`.site-header`)
+
+1. **Vị trí & Cấu trúc HTML (`.header-right`)**:
+   - Áp dụng đồng bộ trên toàn bộ 9 trang có `.site-header` (`dashboard.html`, `job-profile.html`, `interview.html`, `interview-interrupt.html`, `done-interview.html`, `report.html`, `storage.html`, `system-feedback.html`, `thank-you.html` và `profile.html`):
+   - Đặt nút **Sign out** ngay bên phải liên kết Profile (Avatar + Username), ngăn cách bằng một đường kẻ dọc mảnh tinh tế:
+     ```html
+     <div class="header-right">
+       <a class="profile-link" href="profile.html" aria-label="Profile" title="Profile" data-nav="profile">
+         <img class="header-avatar" src="assets/avatar.svg" alt="">
+         <span class="profile-name" data-username>Eric Arthur Blair</span>
+       </a>
+       <span class="header-divider" aria-hidden="true"></span>
+       <a class="header-logout-link" href="sign-in.html" data-sign-out aria-label="Sign out" title="Sign out">
+         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+           <polyline points="16 17 21 12 16 7"></polyline>
+           <line x1="21" y1="12" x2="9" y2="12"></line>
+         </svg>
+         <span class="logout-text">Sign out</span>
+       </a>
+     </div>
+     ```
+2. **Thiết kế thị giác (`.header-divider` & `.header-logout-link`)**:
+   - `.header-divider`: rộng `1px`, cao `20px`, màu `var(--line)`.
+   - `.header-logout-link`: hiển thị icon đăng xuất nhỏ gọn kèm chữ `Sign out` (`font-size: 13.5px; font-weight: 500; color: var(--muted)`), bo tròn nhẹ (`padding: 6px 10px; border-radius: 999px`). Khi di chuột vào chuyển sang sắc đỏ cam dịu (`color: var(--danger); background: rgba(153, 73, 65, 0.08)`).
+   - Trên màn hình di động hẹp (`<= 720px`): ẩn chữ `.logout-text`, giữ lại nút icon tròn gọn gàng bên phải Avatar.
+   - Tận dụng trực tiếp sự kiện `$$("[data-sign-out]")` sẵn có trong `js/app.js` để xóa phiên hiện tại và lưu trạng thái trước khi về `sign-in.html`.
+
+---
+
+#### C. Cải thiện Trang Thiết lập Hồ sơ Công việc (`job-profile.html`, `css/styles.css`, `js/app.js`)
+
+1. **Phân biệt rõ `Job title` và `Seniority / Level` + Đổi Placeholder sang ví dụ cụ thể (`e.g., ...`)**:
+   - Trong khối `#job-manual-mode` (4 trường nhập tay):
+     - **Trường 1 (`#job-title`)**:
+       - Nhãn: `Job title`
+       - Placeholder: **`e.g., Data Engineer`** (thay cho `Enter job title`)
+       - Thêm `name="job-title"`
+     - **Trường 2 (`#domain`)**:
+       - Nhãn: `Domain`
+       - Placeholder: **`e.g., FinTech, E-Commerce`** (thay cho `Enter domain`)
+       - Thêm `name="domain"`
+     - **Trường 3 (`#company`)**:
+       - Nhãn: `Company`
+       - Placeholder: **`e.g., Shopee`** (thay cho `Enter company`)
+       - Thêm `name="company"`
+     - **Trường 4 (`#position`)**:
+       - Đổi nhãn từ `Position` → **`Seniority / Level`** (tránh trùng nghĩa với `Job title`).
+       - Placeholder: **`e.g., Intern, Junior, Senior`** (hoặc sử dụng `<select id="position" name="position" data-job>` với các mức `Intern`, `Fresher / Entry-level`, `Junior`, `Mid-level`, `Senior`, `Lead / Principal` — giữ `<input>` có `datalist` hoặc placeholder `e.g., Junior, Senior` giúp vừa chọn nhanh vừa gõ tự do không làm vỡ dữ liệu cũ).
+
+2. **Tăng độ nhận diện cho nút `USE CV FOR THIS INTERVIEW? ▾` (`#cv-section-toggle`)**:
+   - Thay vì chữ xám mờ dễ nhầm là đường kẻ phân cách tĩnh, nâng cấp `.cv-extend-trigger` thành **Nút bấm viên thuốc (Interactive Pill Toggle Button)** nổi bật giữa đường phân cách:
+     - **Màu chữ**: Xanh cổ vịt đậm (`color: #245b65`).
+     - **Viền & Nền**: Có viền nút bấm rõ ràng (`border: 1.5px solid #8bbdc5`), nền xanh ngọc dịu (`background: #f0f8f9`), bo tròn `border-radius: 999px`, `padding: 8px 20px`, `box-shadow: 0 2px 6px rgba(36, 91, 101, 0.08)`.
+     - **Hiệu ứng Hover & Active (`.is-open`)**:
+       - Khi hover: nền đậm hơn (`background: #e1f2f4; border-color: #4f8f9b; transform: translateY(-1px)`).
+       - Khi đang mở (`.is-open`): nền chuyển sang màu nhấn (`background: #245b65; color: #ffffff; border-color: #245b65`) giúp người dùng nhìn thoáng qua là biết ngay khu vực CV đang được bật/mở.
+
+---
+
+#### D. Nâng cấp Trang Báo cáo Kết quả (`report.html`, `css/styles.css`, `js/app.js`)
+
+1. **Gắn Badge đánh giá nhỏ (`Good` / `Needs Improvement`) ở góc hộp `Our Feedback`**:
+   - Trong mỗi thẻ `.report-card` → `<section class="feedback-block">`, thay thẻ `<h3>Our Feedback</h3>` đơn lẻ bằng thanh tiêu đề `.feedback-block-header`:
+     ```html
+     <section class="feedback-block">
+       <div class="feedback-block-header">
+         <h3>Our Feedback</h3>
+         <span class="feedback-eval-badge is-good" data-feedback-badge="0">Good</span>
+       </div>
+       <p>...</p>
+     </section>
+     ```
+   - **Thiết kế 2 trạng thái Badge (`.feedback-eval-badge`)**:
+     - **`Good` (`.is-good`)**: Nền xanh lá dịu `#e4f3e8`, chữ xanh đậm `#255c36`, viền `#b8dec2`, có chấm tròn nhỏ `●` phía trước (`● Good`).
+     - **`Needs Improvement` (`.is-improve`)**: Nền vàng hổ phách dịu `#fcf0d5`, chữ nâu vàng `#85581A`, viền `#ebd096`, có chấm tròn nhỏ `●` phía trước (`● Needs Improvement`).
+   - **Logic hiển thị thông minh trên PoC (`report.html` & `js/app.js`)**:
+     - Mặc định trên giao diện mẫu: Câu 1 và Câu 2 hiển thị badge **`Good`**, Câu 3 hiển thị badge **`Needs Improvement`** (để buổi demo thấy rõ cả 2 loại badge trực quan).
+     - Ngoài ra trong `js/app.js`: nếu câu trả lời nào của người dùng bị bỏ trống (`!ans || !ans.trim()`), tự động chuyển badge của câu đó sang **`Needs Improvement`**.
+
+2. **Bổ sung 2 Nút Hành Động ở Cuối Trang Báo Cáo (`.report-bottom-actions`)**:
+   - Đặt thanh hành động `.report-bottom-actions` ở cuối `<main id="main" class="page report-page">` (ngay bên dưới `.report-stack`):
+     ```html
+     <div class="report-bottom-actions">
+       <a class="btn btn-secondary btn-pill-action" href="interview.html" id="retake-interview-btn">
+         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+           <polyline points="1 4 1 10 7 10"></polyline>
+           <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+         </svg>
+         <span>Retake interview</span>
+       </a>
+       <a class="btn btn-pill-action" href="system-feedback.html">
+         <span>Rate this feedback</span>
+         <span aria-hidden="true">→</span>
+       </a>
+     </div>
+     ```
+   - **Hành vi của 2 nút**:
+     - **Nút 1 — `Retake interview` (`#retake-interview-btn`)**:
+       - Khi bấm vào: trong `js/app.js`, tạo một phiên phỏng vấn mới giữ nguyên cấu hình `job` và `cv` của buổi báo cáo hiện tại (`startInterview(current.cv, current.cvPdf, ...)`), rồi chuyển thẳng sang `interview.html` (Câu 1) để người dùng luyện tập lại ngay lập tức mà không phải nhập lại Job Profile từ đầu — khép kín hoàn hảo vòng lặp luyện tập.
+     - **Nút 2 — `Rate this feedback →`**:
+       - Dẫn trực tiếp sang `system-feedback.html`, kết nối liền mạch trải nghiệm đọc nhận xét AI với biểu mẫu khảo sát đánh giá chất lượng chấm điểm của hệ thống.
+
+---
+
+### 3. Danh sách File Dự kiến Cập nhật khi Triển khai
+1. **`sign-in.html` & `sign-up.html`**:
+   - Sửa tiêu đề `<h2>Sign in to your account</h2>` và câu dẫn `Don't have an account? Sign up.` / `Already have an account? Sign in.`.
+   - Thêm thuộc tính `name` cho các thẻ `<input>` và chuẩn hóa `autocomplete="current-password"` / `"new-password"`.
+   - Bổ sung nút con mắt ẩn/hiện mật khẩu (`.password-toggle-btn`).
+2. **Toàn bộ 9 file HTML có `.site-header`** (`dashboard.html`, `job-profile.html`, `interview.html`, `interview-interrupt.html`, `done-interview.html`, `report.html`, `storage.html`, `system-feedback.html`, `thank-you.html`, `profile.html`):
+   - Bổ sung nút đăng xuất nhanh `.header-logout-link` (`[data-sign-out]`) ở bên phải `.profile-link` trong `.header-right`.
+3. **`job-profile.html`**:
+   - Đổi nhãn `Position` thành `Seniority / Level`.
+   - Cập nhật placeholder của 4 trường sang ví dụ cụ thể (`e.g., Data Engineer`, `e.g., FinTech, E-Commerce`, `e.g., Shopee`, `e.g., Junior, Senior`).
+4. **`report.html`**:
+   - Thêm `.feedback-block-header` và huy hiệu `.feedback-eval-badge` (`Good` / `Needs Improvement`) ở góc phải trên của từng hộp `Our Feedback`.
+   - Thêm cụm 2 nút `.report-bottom-actions` (`Retake interview` và `Rate this feedback →`) ở cuối trang.
+5. **`css/styles.css`**:
+   - Style cho `.password-input-wrap` và `.password-toggle-btn`.
+   - Style cho `.header-divider` và `.header-logout-link` (kèm responsive mobile).
+   - Nâng cấp style `.cv-extend-trigger` thành nút pill xanh cổ vịt có viền rõ ràng.
+   - Style cho `.feedback-block-header`, `.feedback-eval-badge` (`.is-good`, `.is-improve`) và `.report-bottom-actions`.
+6. **`js/app.js`**:
+   - Bổ sung logic ẩn/hiện mật khẩu cho `[data-toggle-password]`.
+   - Đồng bộ selector `#sign-in-form, #sign-up-form`.
+   - Xử lý nút `#retake-interview-btn` và cập nhật trạng thái badge trên trang `report.html`.
+
+### 4. Trạng thái
+- **DONE** — Đã triển khai đầy đủ các góp ý từ Teammate trên toàn bộ các file HTML, CSS và JS.
+
+---
+
+## [DONE] Tinh chỉnh Huy hiệu Đánh giá (`Good` / `Needs Improvement`) trên trang Report (`report.html`): Hiển thị đủ cả 2 loại Badge trong mọi trường hợp & Đồng bộ Bố cục, Vị trí, Bảng màu theo Theme Yourin
+
+### 1. Phân tích Nguyên nhân Khiến Huy hiệu Hiện tại Trông Chưa Ổn & Chưa Demo Đủ 2 Loại
+
+1. **Vì sao chưa demo được cả 2 loại huy hiệu (`Good` & `Needs Improvement`)**:
+   - **Nguyên nhân 1 (Logic JS ghi đè trong `js/app.js`)**: Đoạn code trong `js/app.js` (dòng 1126–1133) đang kiểm tra `if (!ans || !ans.trim())` và ép **tất cả các câu không nhập câu trả lời** chuyển hết thành `Needs Improvement`. Khi người dùng tạo một buổi phỏng vấn mới để chạy thử luồng demo và bấm `Next` → `Finalize` nhanh mà không gõ câu trả lời, cả 3 câu hỏi đều bị đổi sạch thành `Needs Improvement` (mất hoàn toàn huy hiệu `Good`).
+   - **Nguyên nhân 2 (Vị trí câu có `Needs Improvement` nằm tuốt cuối trang)**: Ở dữ liệu mẫu, cả Câu 1 và Câu 2 đều để `Good`, còn `Needs Improvement` lại đặt ở Câu 3 (nằm sâu bên dưới màn hình đầu tiên), khiến khi mới mở trang Report chỉ nhìn thấy một loại badge.
+
+2. **Vì sao màu sắc và bố cục/vị trí của huy hiệu trông "khá kì" so với Theme Yourin**:
+   - **Lệch bảng màu (Color Clash)**:
+     - Giao diện Yourin sử dụng tông màu dịu, trầm ấm và thanh lịch (`--aqua: #92c7cf`, `--mist: #aad7d9`, `--cream: #fbf9f1`, `--soft: #f0f7f5`, `--ink: #203d43`), tương tự cặp badge `.status` (`#e9f3ec` / `#38604a`) và `.status.unfinished` (`#f6efdd` / `#826731`) ở trang `Your interview`.
+     - Trong khi đó, `.feedback-eval-badge` lại dùng màu xanh lá tươi (`#e6f5ea` / `#20633b`) và vàng tươi (`#fdf2d8` / `#8c5b16`) kèm ký tự text `●` thô (`font-size: 9px`), đặt đè lên nền xanh bạc hà `.feedback-block` (`#f0f7f5`), làm màu xanh–vàng bị chói và lạc quẻ khỏi bảng màu chung.
+   - **Lệch dòng ngang giữa cột `Your Answer` và cột `Our Feedback` (Layout Misalignment)**:
+     - Cột trái (`Your Answer`) dùng `<h3>Your Answer</h3>` cỡ `14px` với `margin-bottom` mặc định của trình duyệt, không có viền khung.
+     - Cột phải (`Our Feedback`) lại đổi `h3` thành `15px`, bọc trong `.feedback-block-header` có chiều cao bị đẩy lệch bởi huy hiệu, khiến dòng chữ tiêu đề `Your Answer` — `Our Feedback` và đoạn văn nội dung bên dưới của 2 cột **không nằm trên cùng một đường thẳng ngang**.
+
+---
+
+### 2. Giải pháp Thiết kế, Bố cục & Bảng màu Mới
+
+#### A. Luôn Demo Đầy Đủ Cả 2 Huy Hiệu (`Good` & `Needs Improvement`) Ngay Từ Màn Hình Đầu Tiên
+1. **Bố trí xen kẽ ngay tại Câu 1 & Câu 2 trên `report.html`**:
+   - **Question 1**: Hiển thị huy hiệu **`Needs Improvement`** (hoặc **`Good`**) — rất khớp với nội dung nhận xét vui của Câu 1 (*"Instead of listing objects, you delivered a bold manifesto... I have no idea what 'the one who knocks' means"*).
+   - **Question 2**: Hiển thị huy hiệu **`Good`** (*"Thou hast answered with a fiery, proactive spirit... consider thyself hired at once"*).
+   - **Question 3**: Hiển thị huy hiệu **`Good`** (hoặc **`Needs Improvement`**).
+   - Nhờ vậy, ngay khi vừa mở `report.html`, người xem nhìn thấy **cả 2 loại huy hiệu (`Needs Improvement` và `Good`) xuất hiện song song ngay trên màn hình đầu tiên** mà không cần cuộn trang.
+2. **Gỡ bỏ đoạn JS tự động ghi đè mất huy hiệu `Good` trong `js/app.js`**:
+   - Xóa đoạn lệnh ép tất cả câu trống thành `Needs Improvement` trong `js/app.js`. Dù người thuyết trình mở buổi phỏng vấn mẫu hay tạo nhanh một buổi phỏng vấn mới để demo, trang `report.html` luôn giữ nguyên kịch bản hiển thị đầy đủ cả 2 loại huy hiệu `Good` và `Needs Improvement`.
+
+---
+
+#### B. Căn chỉnh lại Layout & Vị trí 2 Cột `Your Answer` – `Our Feedback`
+1. **Đồng bộ thanh tiêu đề của cả 2 cột (`.report-col-header`)**:
+   - Cả cột trái (`Your Answer`) và cột phải (`Our Feedback`) đều dùng chung cấu trúc thanh tiêu đề `.report-col-header` (`display: flex; align-items: center; justify-content: space-between; min-height: 28px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid rgba(32, 61, 67, 0.08)`):
+     - Cột trái: `<h3>Your Answer</h3>`
+     - Cột phải: `<h3>Our Feedback</h3>` bên trái + Huy hiệu `.feedback-eval-badge` căn sát góc phải.
+   - Nhờ có cùng `min-height: 28px`, cùng `font-size: 14px; font-weight: 700; color: var(--ink)` và đường kẻ phân cách mảnh bên dưới tiêu đề, hai tiêu đề **`Your Answer`** và **`Our Feedback`** cùng phần văn bản trả lời/nhận xét bên dưới sẽ **thẳng hàng ngang 100%**.
+2. **Tinh chỉnh khung hộp `. report-columns > section` & `.feedback-block`**:
+   - Cột trái (`.answer-block`): Nền trắng tinh sạch kết hợp viền mảnh `border: 1px solid #e6eeec; border-radius: 14px; padding: 20px 24px`.
+   - Cột phải (`.feedback-block`): Nền kem–xanh dịu `background: var(--soft)` (`#f0f7f5`) kèm viền đồng bộ `border: 1px solid #d5e6e3; border-radius: 14px; padding: 20px 24px`.
+   - Xóa bỏ thẻ `<div class="report-section-heading"></div>` rỗng đang tạo khoảng trống thừa `32px` phía trên danh sách câu hỏi.
+
+---
+
+#### C. Bảng Màu Huy Hiệu Đồng Bộ Tuyệt Đối với Theme Yourin (`.feedback-eval-badge`)
+Sử dụng đúng ngôn ngữ thiết kế của huy hiệu `.status` trên trang `Your interview` (`storage.html`): chấm tròn nhỏ tạo bằng CSS `::before` (`width: 6px; height: 6px; border-radius: 50%`), chữ `12px`, `font-weight: 600`, `padding: 4px 12px`, `border-radius: 999px`:
+
+1. **Huy hiệu `Good` (`.feedback-eval-badge.is-good` — Tông Deep Teal nổi bật chuẩn Yourin)**:
+   - **Background**: `#245b65` (xanh cổ vịt đậm chủ đạo của Yourin, tạo độ tương phản sắc nét trên nền hộp `var(--soft)` `#F0F7F5`, không còn bị nhạt nhòa).
+   - **Text color**: `#ffffff` (trắng sắc nét).
+   - **Border**: `1px solid #1c4952` kèm `box-shadow: 0 2px 6px rgba(36, 91, 101, 0.16)`.
+   - **Dot (`::before`)**: `#7ee8db` (chấm sáng xanh ngọc nổi bật trên nền xanh đậm).
+
+2. **Huy hiệu `Needs Improvement` (`.feedback-eval-badge.is-improve` — Tông Warm Apricot-Beige & Orange)**:
+   - **Background**: `#fef3e2` (vàng be / kem cam sáng sạch, tách biệt rõ trên nền `#f0f7f5`).
+   - **Text color**: `#9e4c14` (cam hổ phách đậm rõ nét).
+   - **Border**: `1px solid #f0c999` kèm `box-shadow: 0 2px 6px rgba(180, 88, 24, 0.1)`.
+   - **Dot (`::before`)**: `#e8772e` (chấm cam tươi tắn).
+
+---
+
+### 3. Danh sách File Dự kiến Cập nhật khi Triển khai
+1. **[`report.html`](file:///c:/Users/Mavc/Desktop/interview-poc/interview-poc/report.html)**:
+   - Xóa `<div class="report-section-heading"></div>` rỗng.
+   - Đồng bộ `.report-col-header` cho cả cột `Your Answer` và `Our Feedback` để căn thẳng hàng ngang.
+   - Bỏ ký tự `●` cứng trong HTML, dùng `::before` chuẩn chỉnh; đặt Question 1 là `Needs Improvement` (hoặc `Good`), Question 2 là `Good` (hoặc `Needs Improvement`), Question 3 là `Good` để cả 2 huy hiệu luôn xuất hiện ngay nửa trên trang.
+2. **[`css/styles.css`](file:///c:/Users/Mavc/Desktop/interview-poc/interview-poc/css/styles.css)**:
+   - Cập nhật `.report-columns > section`, `.feedback-block`, `.report-col-header`, và hệ màu `.feedback-eval-badge.is-good` / `.feedback-eval-badge.is-improve` tiệp 100% với bảng màu Yourin.
+3. **[`js/app.js`](file:///c:/Users/Mavc/Desktop/interview-poc/interview-poc/js/app.js)**:
+   - Gỡ bỏ vòng lặp ghi đè `$$("[data-feedback-badge]")` khi câu trả lời trống để luôn bảo toàn việc demo cả 2 loại huy hiệu trong mọi phiên phỏng vấn.
+
+### 4. Trạng thái
+- **DONE** — Đã triển khai và đồng bộ toàn bộ bảng màu, bố cục 2 cột và kịch bản hiển thị cả 2 huy hiệu.

@@ -12,13 +12,8 @@ Each application frame has its own HTML page. Layer names below are replaced wit
 | thank-you.html | Dashboard | dashboard.html | Instant |
 | thank-you.html | Avatar | profile.html | Instant |
 | thank-you.html | Back to home | dashboard.html | SMART_ANIMATE, 300 ms |
-| cv-feedback.html | Home | dashboard.html | SMART_ANIMATE, 300 ms |
-| cv-feedback.html | Dashboard | dashboard.html | Instant |
-| cv-feedback.html | Avatar | profile.html | Instant |
-| cv-feedback.html | Report button | report.html | PUSH TOP, 300 ms |
 | report.html | Dashboard | dashboard.html | Instant |
 | report.html | Avatar | profile.html | Instant |
-| report.html | View CV feedback | cv-feedback.html | PUSH BOTTOM, 300 ms |
 | report.html | Home | dashboard.html | SMART_ANIMATE, 300 ms |
 | done-interview.html | Dashboard | dashboard.html | Instant |
 | done-interview.html | Avatar | profile.html | Instant |

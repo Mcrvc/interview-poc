@@ -174,12 +174,12 @@ input::placeholder, textarea::placeholder { color: #82918f; opacity: 1; }
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #1b363c 0%, #274c54 100%);
-  border: 1px solid rgba(170, 215, 217, 0.4);
-  box-shadow: 0 2px 6px rgba(27, 54, 60, 0.2);
+  background: #6aaeb8;
+  border: 1px solid #aad7d9;
+  box-shadow: 0 2px 6px rgba(32, 61, 67, 0.12);
 }
 .brand-icon img {
-  width: 22px;
+  width: 25px;
   height: auto;
   display: block;
 }
@@ -265,11 +265,12 @@ input::placeholder, textarea::placeholder { color: #82918f; opacity: 1; }
   height: 34px;
   border-radius: 50%;
   object-fit: cover;
-  border: 1.5px solid rgba(146, 199, 207, 0.6);
+  background: var(--cream);
+  border: 1.5px solid #4f8f9b;
   transition: border-color 0.18s ease;
 }
 .profile-link:hover .header-avatar {
-  border-color: var(--ink);
+  border-color: #4f8f9b;
 }
 .profile-name {
   font-size: 14px;
@@ -306,7 +307,7 @@ input::placeholder, textarea::placeholder { color: #82918f; opacity: 1; }
 .profile-page-layout { display: flex; flex-direction: column; gap: 32px; padding-top: 36px; }
 .profile-panel { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 44px; align-items: stretch; }
 .profile-summary { padding: 32px 24px; background: var(--soft); border-radius: 14px; text-align: center; border: 1px solid var(--line); display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; box-sizing: border-box; }
-.profile-avatar-wrapper { width: 140px; height: 140px; margin: 0 auto 20px; border-radius: 50%; overflow: hidden; background: var(--white); border: 3px solid rgba(146, 199, 207, 0.4); display: flex; align-items: center; justify-content: center; }
+.profile-avatar-wrapper { width: 140px; height: 140px; margin: 0 auto 20px; border-radius: 50%; overflow: hidden; background: var(--cream); border: 3px solid #4f8f9b; display: flex; align-items: center; justify-content: center; }
 .profile-avatar-link { display: block; width: 140px; max-width: 100%; margin: 0 auto 20px; border-radius: 50%; }
 .profile-avatar { display: block; width: 100%; height: 100%; object-fit: cover; }
 .profile-summary h2 { overflow-wrap: anywhere; margin: 0; font-size: 22px; }
@@ -1305,196 +1306,6 @@ td:first-child { max-width: 320px; overflow-wrap: anywhere; }
 .feedback-block { background: var(--soft); border-radius: 12px; padding: 22px; }
 .preserve-lines { white-space: pre-wrap; overflow-wrap: anywhere; }
 
-/* 2-Column CV Feedback Section */
-.cv-report-panel {
-  padding: 32px 36px;
-  margin-top: 36px;
-  border-radius: 18px;
-}
-.cv-report-header {
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--line);
-  margin-bottom: 26px;
-}
-.cv-report-header h2 {
-  font-size: 22px;
-  font-weight: 700;
-  margin: 0;
-  color: var(--ink);
-}
-
-.cv-report-split {
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-  gap: 36px;
-  align-items: start;
-}
-
-/* Left Column: Submitted CV Sheet */
-.cv-report-left {
-  min-width: 0;
-}
-.cv-document-sheet {
-  background: #fbf9f1;
-  border: 1px solid #d9e4e0;
-  border-radius: 14px;
-  padding: 24px 26px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-.cv-sheet-section {
-  display: flex;
-  gap: 16px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid #e7efe9;
-}
-.cv-sheet-section:last-child {
-  padding-bottom: 0;
-  border-bottom: none;
-}
-.cv-section-num {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  background: #e1ede8;
-  color: #245b65;
-  font-size: 11.5px;
-  font-weight: 700;
-  border-radius: 8px;
-  flex-shrink: 0;
-}
-.cv-section-content h4 {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--ink);
-  margin: 0 0 6px;
-  letter-spacing: 0.2px;
-}
-.cv-section-content p {
-  font-size: 13.5px;
-  line-height: 1.65;
-  color: #3b565a;
-  margin: 0;
-}
-
-/* Left Column: PDF Preview Sheet */
-.cv-pdf-preview-sheet {
-  background: #ffffff;
-  border: 1px solid #cfe0db;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 4px 16px rgba(32, 61, 67, 0.05);
-}
-.pdf-sheet-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px 20px;
-  background: #f2f8f6;
-  border-bottom: 1px solid #e0ece7;
-}
-.pdf-sheet-icon {
-  color: #245b65;
-  display: flex;
-  align-items: center;
-}
-.pdf-sheet-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.pdf-sheet-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--ink);
-}
-.pdf-sheet-meta {
-  font-size: 11.5px;
-  color: var(--muted);
-}
-.pdf-sheet-body {
-  padding: 24px;
-  background: #ecefe8;
-}
-.pdf-paper-page {
-  background: #ffffff;
-  padding: 24px 22px;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-.pdf-paper-header-mock {
-  padding-bottom: 16px;
-  border-bottom: 1.5px solid #245b65;
-  margin-bottom: 16px;
-}
-.pdf-mock-heading {
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 1.2px;
-  color: #245b65;
-  margin: 14px 0 6px;
-}
-.pdf-mock-heading:first-child { margin-top: 0; }
-.pdf-mock-text {
-  font-size: 12.5px;
-  line-height: 1.6;
-  color: #3f5558;
-  margin: 0;
-}
-
-/* Right Column: Flowing Editorial Evaluation (NO boxes!) */
-.cv-report-right {
-  min-width: 0;
-}
-.cv-editorial-feedback {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-.editorial-header {
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.editorial-header h3 {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--ink);
-  margin: 0;
-}
-.editorial-subtext {
-  font-size: 11.5px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: #49767d;
-}
-.editorial-entry {
-  padding-bottom: 16px;
-  border-bottom: 1px solid #eef3f0;
-}
-.editorial-entry:last-child {
-  padding-bottom: 0;
-  border-bottom: none;
-}
-.editorial-entry h4 {
-  font-size: 14.5px;
-  font-weight: 600;
-  color: var(--ink);
-  margin: 0 0 8px;
-}
-.editorial-entry p {
-  font-size: 14px;
-  line-height: 1.75;
-  color: #3b565a;
-  margin: 0;
-}
 /* System Feedback Polished Vertical Row Layout */
 .feedback-page {
   max-width: 860px;
@@ -1612,7 +1423,7 @@ td:first-child { max-width: 320px; overflow-wrap: anywhere; }
   .page { width: calc(100% - 32px); padding-top: 24px; }
   .header-right { gap: 8px; }
   .panel { padding: 22px; }
-  .form-grid, .profile-panel, .report-columns, .cv-feedback-grid { grid-template-columns: 1fr; }
+  .form-grid, .profile-panel, .report-columns { grid-template-columns: 1fr; }
   .survey-panel { padding: 24px 20px; }
   .survey-field-input { padding-left: 0; }
   .btn-submit-feedback { width: 100%; }

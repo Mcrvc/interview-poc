@@ -38,7 +38,7 @@ sau đó không thay đổi báo cáo cũ. Tài khoản demo khác có bộ dữ
 ## Dữ liệu và giới hạn
 
 - Sign in/Sign up/Profile chỉ mô phỏng; không xác thực thật, không lưu mật khẩu.
-- Câu hỏi và phản hồi lấy từ nội dung mẫu của Figma, không phụ thuộc Job Profile.
+- Câu hỏi và phản hồi lấy từ nội dung mẫu của Figma, không phụ thuộc Job Profile. Report chỉ hiển thị kết quả phỏng vấn; CV được quản lý riêng ở Profile và chỉ là dữ liệu tùy chọn gắn vào buổi phỏng vấn.
 - Các điều khiển chưa có hành vi trong Figma gốc được giữ không hoạt động,
   bao gồm Delete và Microphone. Đây là phạm vi PoC đã chốt, không phải yêu cầu còn thiếu.
 - AI, nhập nội dung từ URL và thu âm nằm ngoài phạm vi PoC.
@@ -58,7 +58,7 @@ sau đó không thay đổi báo cáo cũ. Tài khoản demo khác có bộ dữ
 | Chuẩn bị | job-profile.html, cv.html |
 | Phỏng vấn | interview-1.html, interview-2.html, interview-3.html |
 | Lưu dở / hoàn tất | interview-interrupt.html, done-interview.html |
-| Báo cáo | report.html, cv-feedback.html |
+| Báo cáo | report.html |
 | Phản hồi hệ thống | system-feedback.html, thank-you.html |
 
 index.html là lối mở nhanh; css/styles.css và js/app.js dùng chung.

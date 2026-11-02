@@ -45,18 +45,17 @@
 
     <div class="field"><label for="job-url">Job description link (optional)</label><input id="job-url" type="url" placeholder="https://example.com/job-description" maxlength="2000" data-job></div>
 
-    <label class="check-row"><input type="checkbox" id="sync-cv" checked><span>Sync my saved CV with this interview <small>Use a copy of the CV saved in my account.</small></span></label>
+    <label class="check-row"><input type="checkbox" id="sync-cv" checked><span>Use my saved CV for this interview <small>Use a copy of the CV saved in my account.</small></span></label>
 
-    <!-- INTERACTIVE EXTEND DIVIDER -->
     <div class="cv-extend-divider">
       <button type="button" class="cv-extend-trigger" id="custom-cv-toggle" aria-expanded="false" aria-controls="custom-cv-body">
-        <span>OR use a custom CV for this interview</span>
+        <span>Customize CV for this interview</span>
         <span class="expander-chevron" aria-hidden="true">▾</span>
       </button>
     </div>
 
     <!-- CUSTOM CV BODY (Unfolds directly on the main panel) -->
-    <div class="custom-cv-body is-hidden" id="custom-cv-body">
+    <div class="custom-cv-body is-hidden" id="custom-cv-body" aria-hidden="true">
         <div class="profile-cv-stack">
           <!-- Section 1 -->
           <div class="cv-section-card">

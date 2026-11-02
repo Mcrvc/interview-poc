@@ -730,3 +730,84 @@ Thay vì tách rời vạch chữ hướng dẫn và một khung hộp nút bấ
 
 ### 4. Trạng thái
 - **DONE** — Đã hoàn thành triển khai và kiểm thử.
+
+---
+
+## [DONE] Đồng bộ màu Avatar và huy hiệu Logo trong Header
+
+### Vấn đề hiện tại
+- `assets/avatar.svg` dùng màu `#30364F` cho đầu/thân và nét viền `black`, nên trông gần như đen trên Header và trang Profile, lệch khỏi bảng màu xanh aqua – kem của giao diện.
+- Logo gốc `assets/logo.svg` đã phù hợp; phần gây lệch là nền chuyển sắc rất tối (`#1B363C` → `#274C54`) của `.brand-icon` trong `css/styles.css`. Bỏ nền hoàn toàn sẽ khiến phần hình màu kem `#FBF9F1` của Logo chìm vào Header trắng.
+
+### Giải pháp đề xuất
+1. **Giữ nguyên hình dạng Logo và Avatar.** Chỉ đổi màu và lớp nền hiển thị; không vẽ lại biểu tượng, không dùng CSS filter để đổi màu ảnh.
+2. **Logo Header:** thay nền tối của `.brand-icon` bằng banner-inspired blue `#6AAEB8`, giữ dạng tròn, thêm viền mảnh `#AAD7D9` và bóng rất nhẹ. Giữ `assets/logo.svg` màu gốc, tăng hình trong badge từ `22px` lên khoảng `25–26px` nếu cần.
+3. **Avatar:** đổi hai phần đầu/thân `#30364F` trong `assets/avatar.svg` sang cùng lighter banner-inspired blue `#6AAEB8`; đổi nét viền ngoài màu đen sang darker blue `#4F8F9B`. Đặt nền kem `#FBF9F1` và dùng cùng darker blue cho `.header-avatar` và `.profile-avatar-wrapper` để hình rõ ở cả kích thước nhỏ trong Header lẫn kích thước lớn trên Profile. Dùng cùng một SVG cho cả hai vị trí.
+4. **Tương tác:** đổi màu viền khi hover của avatar sang teal; giữ nguyên liên kết Profile, tên người dùng, trạng thái active và focus bằng bàn phím. Logo ở Sign in/Sign up và favicon tiếp tục dùng SVG gốc.
+
+### File và cách kiểm tra khi triển khai
+- `assets/avatar.svg`: đổi màu fill/stroke, giữ nguyên path và mask.
+- `css/styles.css`: cập nhật `.brand-icon`, `.brand-icon img`, `.header-avatar`, `.profile-link:hover .header-avatar` và `.profile-avatar-wrapper`; không cần sửa HTML.
+- Mở Dashboard, Profile, một trang Interview và Report ở kích thước desktop/mobile. Kiểm tra Logo nhận ra ngay trên Header trắng; Avatar không còn cảm giác đen; viền/bóng không quá nặng; nút Profile và Logo vẫn điều hướng đúng. Kiểm tra lại Sign in/Sign up để bảo đảm Logo gốc không bị đổi màu.
+
+**Trạng thái:** DONE — Đã triển khai và kiểm tra tĩnh.
+
+---
+
+## [DONE] Tách rõ luồng quản lý CV và luồng phỏng vấn
+
+### 1. Mục tiêu và luồng sử dụng
+- **Quản lý CV:** Dashboard → Manage your CV → Profile / Your CV → Save CV.
+- **Luyện phỏng vấn:** Dashboard → Job Profile + CV tùy chọn → Interview → Interview Report.
+- CV được dùng làm thông tin nền cho buổi phỏng vấn; báo cáo tập trung vào câu hỏi, câu trả lời và nhận xét câu trả lời. Trong PoC, nội dung câu hỏi và nhận xét vẫn là dữ liệu mẫu theo phạm vi đã thống nhất.
+- Kế hoạch này thay thế quyết định trước đây về việc gộp CV Feedback vào Report. Các mục `[DONE]` trước đó được giữ làm lịch sử thay đổi.
+
+### 2. Thay đổi giao diện và hành vi
+1. **Report chỉ hiển thị kết quả phỏng vấn** (`report.html`):
+   - Xóa toàn bộ phần `#cv-report` / “CV & Resume Feedback”, gồm bản xem CV dạng 4 mục, bản xem PDF và các đoạn nhận xét CV.
+   - Giữ tên buổi phỏng vấn, ngày, câu hỏi, câu trả lời và nhận xét từng câu; chỉnh khoảng cách cuối trang sau khi bỏ phần CV.
+2. **Quản lý CV tập trung tại Profile → Your CV** (`profile.html`):
+   - Tiếp tục dùng 4 mục văn bản hoặc tải PDF và thao tác Save CV hiện có.
+   - Thay CV tại Profile chỉ cập nhật CV tài khoản; bản CV đã gắn với buổi phỏng vấn cũ vẫn là bản sao tại thời điểm bắt đầu.
+3. **Một lựa chọn CV rõ ràng trong Job Profile** (`job-profile.html`):
+   - Giữ lại checkbox **“Use my saved CV for this interview”** và bố cục mở rộng CV cũ; đổi dòng mở rộng thành **“Customize CV for this interview”**.
+   - Khi checkbox bật, sao chép đúng định dạng văn bản hoặc PDF đã lưu khi bắt đầu; khi tắt, bắt đầu phỏng vấn không gắn CV.
+   - Khi khối Customize mở, chỉ dùng trình nhập 4 mục / tải PDF tùy chỉnh; tái sử dụng quy tắc loại trừ giữa văn bản và PDF đang có.
+   - Khi khối Customize mở nhưng chưa nhập nội dung hoặc chọn PDF hợp lệ, hiển thị lỗi tại khu vực CV; checkbox tắt vẫn là cách bỏ qua CV.
+   - Việc mở rộng hoặc thu gọn khối không ghi đè CV tài khoản; chỉ nguồn đang chọn được gắn vào buổi phỏng vấn mới.
+   - Checkbox và nút mở rộng hỗ trợ bàn phím, nhãn đọc được và trạng thái ẩn/hiện rõ ràng; giữ bố cục phù hợp desktop/mobile.
+4. **Đồng bộ nội dung Dashboard** (`dashboard.html`):
+   - Sửa mô tả Hero để tập trung vào luyện phỏng vấn và nhận xét câu trả lời.
+   - Sửa mô tả thẻ Your interview để nói về tiếp tục buổi đang dở và xem báo cáo phỏng vấn; bỏ lời hứa về CV analysis reports.
+   - Giữ Manage your CV là lối vào riêng tới `profile.html#your-cv`.
+
+### 3. Danh sách file và công việc kỹ thuật
+- `report.html`: xóa phần CV và nhận xét CV.
+- `job-profile.html`: khôi phục checkbox và khối mở rộng CV cũ, với nhãn mới cho nút Customize.
+- `dashboard.html`: cập nhật nội dung mô tả.
+- `js/app.js`: giữ cách đọc `#sync-cv` và xử lý `#custom-cv-toggle`, cập nhật lưu form, kiểm tra dữ liệu và `startInterview` để phân biệt Saved CV, Custom CV và No CV. Gỡ phần render CV/nhận xét CV/PDF dành riêng cho Report, bảo đảm phần render kết quả phỏng vấn vẫn chạy khi các node CV đã bị xóa.
+- `js/app.js`: xử lý dữ liệu đã lưu theo hướng tương thích; có thể dùng giá trị `syncCV` cũ để khởi tạo lựa chọn nếu chưa có trạng thái mới, nhưng trạng thái mới quyết định nguồn CV của buổi tiếp theo. Giữ các buổi phỏng vấn cũ và dữ liệu tài khoản.
+- `css/styles.css`: thêm style nhóm chọn nguồn CV theo bảng màu hiện tại; gỡ style chỉ phục vụ phần CV trên Report sau khi kiểm tra tham chiếu. Giữ các class đang dùng chung với trình nhập CV tại Profile/Job Profile.
+- `js/data.js`: kiểm tra và gỡ dữ liệu `cvFeedback` nếu không còn nơi nào sử dụng.
+- `docs/README.md` và `docs/TRANSITIONS.md`: cập nhật mô tả luồng hiện tại, loại bỏ hướng dẫn mở CV Feedback và ghi nhận Report chỉ có kết quả phỏng vấn.
+
+### 4. Tiêu chí kiểm tra khi triển khai
+- Báo cáo mới và báo cáo của buổi đã lưu đều mở bình thường; tên, ngày, câu trả lời và nhận xét phỏng vấn vẫn đúng; không còn CV preview hay nhận xét CV.
+- Thử checkbox Saved CV với cả văn bản và PDF, mở rộng Custom CV với cả văn bản và PDF, và checkbox tắt cho No CV; mỗi buổi chỉ lưu nguồn được chọn.
+- Tài khoản chưa có CV vẫn bắt đầu phỏng vấn được; Custom CV trống có lỗi rõ ràng và không tự lấy CV tài khoản.
+- Chuyển giữa các lựa chọn, tiếp tục buổi đang dở, tải lại dữ liệu tài khoản cũ và sửa CV tài khoản sau khi bắt đầu buổi mới không gây mất dữ liệu hoặc thay đổi bản CV của buổi cũ.
+- Kiểm tra checkbox và nút mở rộng bằng bàn phím và trên màn hình hẹp; kiểm tra Manage your CV vẫn dẫn đúng nơi và Dashboard không còn giới thiệu CV analysis trong luồng báo cáo.
+
+**Trạng thái:** DONE — Đã triển khai luồng và kiểm tra tĩnh. Chức năng đánh giá CV độc lập vẫn là hướng phát triển sau.
+
+---
+
+## [DONE] Chốt màu Header và Avatar sau khi duyệt (2026-11-02)
+
+- Người dùng đã duyệt màu lấy cảm hứng từ banner Dashboard.
+- Nền tròn Logo Header: xanh sáng `#6AAEB8`, viền `#AAD7D9`; Logo giữ màu gốc và hiển thị rộng `25px`.
+- Đầu/thân Avatar: xanh sáng `#6AAEB8`, nền kem `#FBF9F1`.
+- Viền tròn Avatar: xanh đậm hơn `#4F8F9B`, đồng bộ trong SVG, Header và khung Avatar lớn tại Profile; hover Header dùng cùng màu viền.
+- Đã kiểm tra SVG hợp lệ và `git diff --check`. Các kiểm tra này là kiểm tra tĩnh; chưa chạy kiểm tra trình duyệt tự động trong môi trường hiện tại.
+
+**Trạng thái:** DONE — Đã được người dùng duyệt, sẵn sàng commit và push lên `main`.

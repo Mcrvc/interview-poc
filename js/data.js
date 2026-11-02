@@ -21,12 +21,6 @@ window.POC_DATA = {
     "Lead Security Specialist | Joestar Operations Neutralized high-risk international threats under extreme pressure. Led crisis response teams to a 100% mission success rate.",
     "Expert in strategic tactical planning, split-second hazard assessment, peerless physical endurance, and non-verbal threat neutralization under extreme pressure."
   ],
-  "cvFeedback": [
-    "Your profile projects immense authority. You instantly establish yourself as a stoic leader who dominates workplace pressure rather than just handling it.",
-    "Bypassing traditional ivory towers for rugged field research, this unconventional academic background proves a rare grit and dedication to deep-sea discovery.",
-    "This section hits like a freight train. By focusing on a flawless success rate, you prove you are a decisive closer built for critical crises.",
-    "Unmatched poise and terrifyingly fast crisis management make them an elite asset, though one wonders how street-level threat neutralization translates to daily office duties."
-  ],
   "survey": [
     "Did you get a Golden Experience with the accuracy of the AI-generated interview feedback?",
     "How intuitive and easy-to-use did you find the interview navigation and interface?",

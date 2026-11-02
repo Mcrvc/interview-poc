@@ -81,7 +81,7 @@
   function reportInterview() {
     return activeInterview() || account.interviews.find(item => item.finished) || account.interviews[0];
   }
-  function startInterview(customCV, customPdf) {
+  function startInterview(customCV, customPdf, source) {
     const id = "interview-" + Date.now();
     let interviewCV = ["", "", "", ""];
     let interviewPdfItem = null;
@@ -93,7 +93,7 @@
     } else if (customCV && customCV.some(text => text && text.trim())) {
       interviewCV = [...customCV];
       mode = "text";
-    } else if (account.syncCV) {
+    } else if (source !== "none" && account.syncCV) {
       if (account.cvPdf || account.cvMode === "pdf") {
         interviewPdfItem = account.cvPdf ? { ...account.cvPdf } : null;
         mode = "pdf";
@@ -121,7 +121,9 @@
   }
   function saveJob() {
     account.job = Object.fromEntries(jobKeys.map(key => [key, $("#" + key).value.trim()]));
-    account.syncCV = $("#sync-cv").checked;
+    const syncCvCheckbox = $("#sync-cv");
+    account.syncCV = syncCvCheckbox ? syncCvCheckbox.checked : account.syncCV !== false;
+    account.cvSource = account.syncCV ? "saved" : "none";
     save();
   }
   function saveCV() {
@@ -399,13 +401,18 @@
       input.addEventListener("input", saveJob);
     });
     const syncCvCheckbox = $("#sync-cv");
+    const customCvBody = $("#custom-cv-body");
     syncCvCheckbox.checked = account.syncCV !== false;
     syncCvCheckbox.addEventListener("change", saveJob);
-
-    // Custom CV expander toggle
-    const customCvToggle = $("#custom-cv-toggle");
-    const customCvBody = $("#custom-cv-body");
     let isExpanderOpen = false;
+    const customCvToggle = $("#custom-cv-toggle");
+    customCvToggle.addEventListener("click", () => {
+      isExpanderOpen = !isExpanderOpen;
+      customCvToggle.classList.toggle("is-open", isExpanderOpen);
+      customCvBody.classList.toggle("is-hidden", !isExpanderOpen);
+      customCvBody.setAttribute("aria-hidden", String(!isExpanderOpen));
+      customCvToggle.setAttribute("aria-expanded", String(isExpanderOpen));
+    });
 
     // Helpers for mutual exclusivity between custom CV 4-sections and custom PDF
     function clearCustomCvSections() {
@@ -428,13 +435,6 @@
     customCvInputs.forEach((textarea, index) => {
       textarea.value = isProfilePdf ? "" : (account.cv[index] || "");
       textarea.addEventListener("input", clearCustomInterviewPdf);
-    });
-
-    customCvToggle.addEventListener("click", () => {
-      isExpanderOpen = !isExpanderOpen;
-      customCvToggle.classList.toggle("is-open", isExpanderOpen);
-      customCvBody.classList.toggle("is-hidden", !isExpanderOpen);
-      customCvToggle.setAttribute("aria-expanded", String(isExpanderOpen));
     });
 
     // Custom PDF Upload handling for this interview
@@ -529,17 +529,22 @@
 
       if (isExpanderOpen) {
         if (interviewPdf) {
-          startInterview(["", "", "", ""], interviewPdf);
+          startInterview(["", "", "", ""], interviewPdf, "custom");
         } else {
           const customCV = customCvInputs.map(input => input.value);
-          startInterview(customCV, null);
+          if (!customCV.some(text => text.trim())) {
+            return error("#job-error", "Add custom CV content or choose No CV to continue without a CV.");
+          }
+          startInterview(customCV, null, "custom");
+        }
+      } else if (syncCvCheckbox.checked) {
+        if (account.cvPdf || account.cvMode === "pdf") {
+          startInterview(["", "", "", ""], account.cvPdf, "saved");
+        } else {
+          startInterview([...account.cv], null, "saved");
         }
       } else {
-        if (account.cvPdf || account.cvMode === "pdf") {
-          startInterview(["", "", "", ""], account.cvPdf);
-        } else {
-          startInterview([...account.cv], null);
-        }
+        startInterview(null, null, "none");
       }
       go("interview.html");
     });
@@ -863,45 +868,6 @@
         element.textContent = interview.answers[index] || "No answer provided.";
       });
 
-      // Populate CV text sections
-      const cvData = interview.cv || account.cv || DATA.cv;
-      $$("[data-cv-report]").forEach((element, index) => {
-        if (cvData && cvData[index]) {
-          element.textContent = cvData[index];
-        }
-      });
-      $$("[data-cv-pdf-text]").forEach((element, index) => {
-        if (cvData && cvData[index]) {
-          element.textContent = cvData[index];
-        }
-      });
-
-      // Populate CV editorial feedback
-      const feedbackData = DATA.cvFeedback || [];
-      $$("[data-cv-feedback]").forEach((element, index) => {
-        if (feedbackData[index]) {
-          element.textContent = feedbackData[index];
-        }
-      });
-
-      // Automatically show the CV format chosen by user (PDF or 4 Sections)
-      const cvSectionsView = $("#cv-sections-view");
-      const cvPdfView = $("#cv-pdf-view");
-      const reportPdfName = $("#report-pdf-name");
-      const reportPdfMeta = $("#report-pdf-meta");
-
-      const hasPdf = Boolean(interview.cvPdf || (interview.cvMode === "pdf" && account.cvPdf));
-      const activePdf = interview.cvPdf || (interview.cvMode === "pdf" ? account.cvPdf : null);
-
-      if (hasPdf && activePdf) {
-        if (cvSectionsView) cvSectionsView.classList.add("is-hidden");
-        if (cvPdfView) cvPdfView.classList.remove("is-hidden");
-        if (reportPdfName) reportPdfName.textContent = activePdf.name || "Candidate_Resume.pdf";
-        if (reportPdfMeta) reportPdfMeta.textContent = `Uploaded PDF Document · ${activePdf.size || "340 KB"}`;
-      } else {
-        if (cvPdfView) cvPdfView.classList.add("is-hidden");
-        if (cvSectionsView) cvSectionsView.classList.remove("is-hidden");
-      }
     }
   }
   if (page === "system-feedback") {

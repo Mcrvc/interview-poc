@@ -215,6 +215,7 @@
 
   $$("[data-new-interview]").forEach(link => link.addEventListener("click", () => {
     account.activeId = null;
+    account.job = {};
     save();
   }));
 
@@ -483,10 +484,8 @@
       });
     }
 
-    // If previously saved state has manual fields but no job-source, show manual mode by default
-    if (!account.job["job-source"] && manualJobKeys.some(key => Boolean(account.job[key]))) {
-      setJobMode("manual");
-    }
+    // Always start in paste/link description mode by default
+    setJobMode("paste");
 
     // 2. CV Section Extend Toggle ("Use CV for this interview?")
     const cvSectionToggle = $("#cv-section-toggle");

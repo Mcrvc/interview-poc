@@ -1184,3 +1184,216 @@ Toàn bộ phần CV trên `job-profile.html` chỉ nằm gọn trong **1 khung 
 
 ### 4. Trạng thái
 - **DONE** — Đã hoàn thành triển khai: ô dán CV thuần trên Profile và `account.cv` mặc định để trống (blank) thay vì nạp sẵn dữ liệu mẫu `DATA.cv`.
+
+
+---
+
+## [DONE] Thiết kế lại bố cục trang Interview (`interview.html`): Bổ sung Robot 2D dễ thương diễn hoạt nhép miệng (Mime Animation) đọc câu hỏi phỏng vấn
+
+### 1. Vấn đề hiện tại & Góp ý từ Giáo sư
+- Hiện tại, trang phỏng vấn (`interview.html`) chỉ hiển thị một khối văn bản câu hỏi tĩnh (`<blockquote class="question">`) đặt phía trên ô nhập câu trả lời.
+- Giáo sư phản hồi giao diện phỏng vấn hiện tại **nhàm chán và thiếu tính tương tác/cuốn hút (boring and not really engaging)** — người dùng có cảm giác đang điền một biểu mẫu văn bản hơn là đang tham gia một buổi phỏng vấn với trợ lý AI.
+- **Yêu cầu từ Giáo sư**:
+  1. Bổ sung một **nhân vật Robot 2D dễ thương (Cute 2D Robot Sprite)** đóng vai trò người phỏng vấn AI trực tiếp đặt câu hỏi.
+  2. Robot có **hoạt ảnh diễn tả / nhép miệng theo câu hỏi (Mime / Lip-sync & Gesture Animation)** như đang đọc câu hỏi thành tiếng cho ứng viên.
+  3. **Lưu ý phạm vi hiện tại**: Tính năng đọc giọng nói thật (Text-to-Speech / TTS) là yêu cầu cho giai đoạn sau nhưng **chưa triển khai trong bước này**. Hiện tại tập trung thiết kế lại bố cục (Re-layout) để dành không gian cho Robot, vẽ 2D Sprite Robot và lập trình hiệu ứng diễn hoạt (Mime Animation) khớp với luồng chuyển câu hỏi (sẵn sàng điểm neo để gắn TTS sau này).
+
+---
+
+### 2. Giải pháp thiết kế & Bố cục chi tiết (Re-layout + 2D Robot Sprite + Mime Animation)
+
+#### A. Bố cục lại trang Interview (`.interviewer-stage` — Chia không gian cho Robot & Bong bóng câu hỏi)
+Thay thế khối `<blockquote class="question">` đơn điệu bằng **Sân khấu Phỏng vấn AI (`.interviewer-stage`)** đặt ngay dưới `.interview-header` và phía trên `.answer-section`:
+
+1. **Bố cục 2 cột cân đối trên Desktop (`grid-template-columns: 210px minmax(0, 1fr); gap: 24px; align-items: center`)**:
+   - **Cột Trái — Khung Sân Khấu Robot (`.robot-stage-pod`)**:
+     - Khung nền bo tròn mềm mại (`border-radius: 20px`), nền gradient xanh kem dịu (`radial-gradient` đồng bộ bảng màu `#92C7CF` / `#AAD7D9` / `#FBF9F1`) tạo chiều sâu như một buồng gọi video / sân khấu nhỏ của AI.
+     - Chứa **2D Robot Sprite** ở trung tâm kèm bóng đổ lơ lửng bên dưới (`.robot-shadow`).
+     - Phía dưới chân Robot là **Huy hiệu trạng thái động (`.robot-status-pill`)**:
+       - Khi Robot đang diễn hoạt đọc câu hỏi: hiển thị chấm sáng nhịp thở + nhãn `Asking question...`
+       - Khi Robot dừng đọc / chờ trả lời: hiển thị `Ready for your answer`
+       - Khi ứng viên bật Mic thu âm: hiển thị `Listening to you...`
+   - **Cột Phải — Bong Bóng Câu Hỏi Tương Tác (`.question-speech-card`)**:
+     - Thiết kế khối câu hỏi như một **bong bóng thoại (Speech Bubble)** có mũi nhọn (`.speech-bubble-tail`) hướng trực tiếp về phía Robot bên trái, tạo cảm giác Robot đang thực sự nói ra câu hỏi đó.
+     - **Thanh công cụ nhỏ đầu bong bóng (`.question-card-top`)**:
+       - Bên trái: Nhãn nhỏ `AI INTERVIEWER` kèm dải sóng âm mini nhấp nhô khi Robot đang nhép miệng đọc câu hỏi.
+       - Bên phải: Nút tương tác **`Replay question`** (`#robot-replay-btn` với icon loa/play nhỏ) để người dùng hoặc người thuyết trình demo có thể bấm cho Robot diễn hoạt đọc lại câu hỏi bất cứ lúc nào (đồng thời là nút kích hoạt TTS trong tương lai).
+     - **Nội dung câu hỏi (`#question-text`)**: Giữ cỡ chữ lớn, dễ đọc (`17px–18px`, `line-height: 1.68`), kèm hiệu ứng xuất hiện mượt mà khi chuyển sang câu hỏi mới.
+
+2. **Tương thích Responsive (Tablet / Mobile `< 720px`)**:
+   - Tự động xếp dọc: Khung Robot nằm phía trên, mũi nhọn bong bóng thoại xoay hướng lên trên trỏ vào Robot, đảm bảo không bị tràn hay chật hẹp trên màn hình nhỏ.
+
+---
+
+#### B. Thiết kế Nhân vật Robot 2D (`assets/robot-interviewer.svg` + Inline SVG Layers)
+Thiết kế vector 2D sắc nét, thân thiện và đồng bộ 100% với bảng màu thương hiệu **Yourin** (`#203D43` Ink, `#6AAEB8` Banner Blue, `#92C7CF` Aqua, `#AAD7D9` Mist, `#FBF9F1` Cream):
+- **Cấu trúc tách lớp (Layered 2D Sprite)** để điều khiển chuyển động độc lập từng bộ phận bằng CSS/JS:
+  1. **Ăng-ten phát sáng (`.robot-antenna`)**: Đỉnh đầu có ăng-ten nhỏ với quả cầu sáng màu xanh ngọc phát xung nhịp khi Robot đang nói.
+  2. **Đầu & Màn hình khuôn mặt (`.robot-head` & `.robot-visor`)**: Đầu bo tròn bầu bĩnh màu kem/xanh sáng (`#FBF9F1` & `#AAD7D9`), mặt kính visor tối màu (`#203D43`) làm nổi bật mắt và miệng LED phát sáng (`#92C7CF`).
+  3. **Đôi mắt biểu cảm (`.robot-eyes`)**: Đôi mắt LED to tròn dễ thương có hiệu ứng **chớp mắt tự nhiên** (`@keyframes robot-blink`), biết cong lên vui vẻ hoặc nheo nhẹ biểu cảm khi đang đặt câu hỏi.
+  4. **Miệng nhép theo âm tiết (`.robot-mouth`)**:
+     - Trạng thái nghỉ (`idle`): Miệng cười mỉm thân thiện (đường cong LED êm ái).
+     - Trạng thái đọc câu hỏi (`miming`): Miệng đóng/mở liên tục kết hợp sóng âm LED biến thiên nhiều khẩu hình (`O`, `A`, `E`, `smile`) tạo hiệu ứng nhép miệng (lip-sync mime) sinh động.
+  5. **Thân & Đôi tay cử chỉ (`.robot-torso`, `.robot-arm-left`, `.robot-arm-right`)**:
+     - Thân nhỏ gọn lơ lửng nhẹ nhàng (`@keyframes robot-float`).
+     - Hai cánh tay tách rời: khi đọc câu hỏi, tay phải vẫy nhẹ / đưa lên diễn đạt ý (mime gesture), đầu nghiêng nhẹ qua lại tạo thần thái tự nhiên, cuốn hút.
+
+---
+
+#### C. Kịch bản Hoạt ảnh Diễn tả (Mime Animation States) trong `css/styles.css` & `js/app.js`
+1. **Trạng thái 1 — `is-miming` (Đang đọc / diễn tả câu hỏi)**:
+   - **Khi nào kích hoạt**:
+     - Tự động chạy ngay khi mở trang `interview.html` (Question 1).
+     - Tự động chạy lại mỗi khi bấm **`Next Question →`** hoặc **`← Previous Question`** (`renderStep(index)`).
+     - Chạy bất cứ khi nào người dùng bấm nút **`Replay question`** (`#robot-replay-btn`).
+   - **Hiệu ứng thị giác**:
+     - Class `.is-miming` gắn vào `#robot-stage`: kích hoạt chuỗi `@keyframes robot-mouth-mime` (nhép miệng đa nhịp), `@keyframes robot-head-talk` (nghiêng đầu nhẹ theo nhịp nói), `@keyframes robot-arm-gesture` (tay phải cử chỉ thuyết trình), và `@keyframes antenna-glow` (ăng-ten phát sáng).
+     - Dải sóng âm nhỏ cạnh chữ `AI INTERVIEWER` trong bong bóng câu hỏi nhấp nhô đồng bộ.
+   - **Thời lượng thông minh**:
+     - Tự động tính thời gian diễn hoạt dựa trên độ dài câu hỏi (khoảng `3.5s – 5.5s`) rồi mượt mà chuyển về trạng thái nghỉ (`is-idle`), hoặc người dùng có thể bấm nút `#robot-replay-btn` để dừng/phát lại ngay lập tức.
+2. **Trạng thái 2 — `is-idle` (Chờ ứng viên trả lời)**:
+   - Robot lơ lửng nhẹ nhàng (`@keyframes robot-float`), mắt chớp tự nhiên định kỳ mỗi vài giây, miệng mỉm cười khích lệ.
+3. **Trạng thái 3 — `is-listening` (Khi ứng viên bấm nút Microphone thu âm)**:
+   - Khi người dùng bấm `#mic-toggle-btn` (`startRecording()`), Robot chuyển sang trạng thái chăm chú lắng nghe: đầu hơi nghiêng về phía trước, tai/ăng-ten sáng nhịp xanh-đỏ nhẹ, huy hiệu dưới chân hiện `Listening to you...`, tăng tính kết nối hai chiều giữa ứng viên và Robot.
+
+---
+
+### 3. Danh sách file đã cập nhật khi triển khai
+1. **`interview.html` & `interview-interrupt.html`**:
+   - Thay thế `<blockquote class="question">` đơn điệu bằng cấu trúc `.interviewer-stage` gồm `.robot-stage-pod` (Robot 2D Sprite phân lớp + bóng đổ + huy hiệu trạng thái động) và `.question-speech-card` (bong bóng thoại câu hỏi có đuôi hướng về phía Robot, nhãn AI INTERVIEWER với sóng âm, nút Replay question `#robot-replay-btn`, và nội dung câu hỏi).
+2. **`css/styles.css`**:
+   - Bổ sung toàn bộ hệ thống lớp `.interviewer-stage`, `.robot-stage-pod`, `.robot-visual`, `.robot-sprite`, `.robot-shadow`, `.robot-status-pill`, `.question-speech-card`, `.speech-bubble-tail`, `.mime-audio-bars`, `.btn-replay-question`.
+   - Bổ sung chuỗi `@keyframes`: `robot-float` (lơ lửng), `robot-shadow-scale` (bóng co giãn), `robot-blink` (chớp mắt tự nhiên), `antenna-flash` (ăng-ten phát xung), `robot-head-talk` (nghiêng đầu khi nói), `robot-arm-gesture` (tay phải diễn đạt cử chỉ), `robot-mouth-mime` (nhép miệng đa nhịp), và hỗ trợ chế độ màn hình nhỏ `< 720px`.
+3. **`js/app.js`**:
+   - Triển khai `startRobotMime()` và `stopRobotMime()`: tự động kích hoạt diễn hoạt nhép miệng theo độ dài từng câu hỏi khi vào trang hoặc chuyển câu hỏi; nút `#robot-replay-btn` cho phép diễn hoạt lại bất kỳ lúc nào; đồng bộ trạng thái `is-listening` ("Listening to you...") khi ứng viên bật Microphone.
+
+### 4. Trạng thái
+- **DONE** — Đã hoàn thành triển khai và kiểm tra cấu trúc HTML/CSS/JS.
+
+
+
+---
+
+## [DONE] Tinh chỉnh Robot 2D trên trang Interview (`interview.html`): Xóa huy hiệu `Ready for your answer`, đổi tên `AI INTERVIEWER` thành `YORI` & gắn Logo Yourin lên bụng Robot
+
+### 1. Các điểm điều chỉnh đã thực hiện
+1. **Xóa bỏ huy hiệu trạng thái `Ready for your answer` (`.robot-status-pill`)**:
+   - Đã xóa hoàn toàn `.robot-status-pill` khỏi `interview.html` và `interview-interrupt.html`.
+   - Căn giữa Robot và bóng đổ lơ lửng ngay tâm khung `.robot-stage-pod`, giúp giao diện sân khấu gọn gàng, thoáng đãng và tập trung vào nhân vật.
+2. **Đổi tên `AI INTERVIEWER` thành `YORI`**:
+   - Nhãn trên đầu bong bóng câu hỏi (`.tag-title`) được đổi thành **`YORI`** — tên gọi thân thiện, ngắn gọn và đồng điệu với thương hiệu **Yourin**.
+3. **Gắn Logo chính thức của Yourin (`assets/logo.svg`) lên bụng Robot**:
+   - Đã thay thế cụm hình chữ nhật và hình tròn cũ bằng huy hiệu tròn xanh `#6AAEB8` sắc nét chứa vector Logo Yourin nguyên bản (bong bóng kem `#FBF9F1` và biểu tượng `#203D43`), tạo dấu ấn nhận diện thương hiệu tức thì.
+
+---
+
+### 2. Danh sách file đã cập nhật
+1. **`interview.html` & `interview-interrupt.html`**:
+   - Xóa `.robot-status-pill`.
+   - Đổi `AI INTERVIEWER` thành `YORI`.
+   - Thêm `.robot-belly-logo` (Vector Logo Yourin) vào `.robot-body-group`.
+2. **`css/styles.css`**:
+   - Đặt `.robot-stage-pod` thành `justify-content: center` và dọn dẹp các CSS rules của status pill.
+3. **`js/app.js`**:
+   - Gỡ bỏ các dòng gán text của `#robot-status-text`, giữ nguyên chuyển động diễn hoạt nhép miệng, chớp mắt, ăng-ten phát sáng và cử chỉ tay.
+
+### 3. Trạng thái
+- **DONE** — Đã hoàn thành triển khai và kiểm tra tĩnh.
+
+
+
+---
+
+## [DONE] Tinh gọn chiều cao khung Robot & khung Câu hỏi (`interview.html`): Đưa tên `YORI` sang khung Robot, bỏ khung trắng bao ngoài câu hỏi & chuyển cụm điều khiển (Icon, Sóng âm, nút Replay) xuống dưới câu hỏi
+
+### 1. Phân tích vấn đề & Các thay đổi đã thực hiện
+1. **Bỏ hoàn toàn khung chữ nhật trắng bao ngoài (`.question-speech-card` nền trắng)**:
+   - Đã loại bỏ hộp trắng bao ngoài và lớp đệm kép, chuyển `.question-speech-card` thành một khối duy nhất có nền mềm `var(--soft)` và viền trái `4px solid var(--aqua)`.
+   - Giúp giảm đáng kể chiều cao theo trục dọc (vertical height) của cả khung câu hỏi lẫn khung Robot bên trái mà không làm chật chội chiều ngang.
+2. **Đưa tên `YORI` sang khung Robot (Robot Banner)**:
+   - Nhãn tên **`YORI`** (`.robot-name-badge`) đã được chuyển trực tiếp sang khung Robot bên trái, đặt ngay bên dưới bóng đổ của Robot.
+3. **Chuyển cụm UI (Biểu tượng Robot, Dải sóng âm, Nút `Replay`) xuống dưới câu hỏi**:
+   - Nội dung câu hỏi (`#question-text`) được đặt lên trên đầu khung.
+   - Ngay dưới câu hỏi là thanh điều khiển tinh gọn `.question-card-bottom` chứa biểu tượng avatar Robot, dải sóng âm nhấp nhô khi Robot nhép miệng đọc, và nút **`Replay`** ở góc phải.
+
+---
+
+### 2. Danh sách file đã cập nhật
+1. **`interview.html` & `interview-interrupt.html`**:
+   - Thêm `<span class="robot-name-badge">YORI</span>` vào `.robot-stage-pod`.
+   - Đưa nội dung câu hỏi lên đầu `.question-speech-card` và gom icon, sóng âm, nút Replay vào `.question-card-bottom`.
+2. **`css/styles.css`**:
+   - Tối ưu kích thước `.interviewer-stage` (`160px minmax(0, 1fr)`), `.robot-stage-pod`, `.robot-visual`, và `.robot-name-badge`.
+   - Cập nhật `.question-speech-card` thành dải phẳng nền `var(--soft)` viền aqua trái, xóa bỏ `.speech-bubble-tail` và hộp trắng cũ.
+
+### 3. Trạng thái
+- **DONE** — Đã hoàn thành triển khai và kiểm tra tĩnh.
+
+
+
+---
+
+## [DONE] Nâng cấp tương tác Yori & Bong bóng câu hỏi (`interview.html`): Đưa tên `YORI` lên trên đầu Robot, bo tròn + thêm đuôi nhọn (Speech Tail) cho khung câu hỏi & làm mắt/đầu Yori dõi theo khi ứng viên gõ chữ hoặc nói
+
+### 1. Phân tích các yêu cầu & Thay đổi đã thực hiện
+1. **Đưa nhãn tên `YORI` lên phía trên mô hình Robot**:
+   - Đã di chuyển `<span class="robot-name-badge">YORI</span>` lên trên đỉnh khung `.robot-stage-pod`, nằm phía trên `.robot-visual`.
+2. **Bo tròn khung câu hỏi & Thêm mũi nhọn hội thoại (Speech Bubble Tail)**:
+   - Bo tròn đều 4 góc `.question-speech-card` (`border-radius: 18px; border: 1.5px solid #b8d7dc; background: var(--soft)`).
+   - Gắn mũi nhọn `.speech-bubble-tail` đồng màu `var(--soft)` trỏ thẳng sang Yori (trên mobile xoay trỏ lên trên Yori), thể hiện rõ câu hỏi là lời nói của Yori mà vẫn giữ nguyên thiết kế 1 lớp gọn nhẹ.
+3. **Hành vi đôi mắt & cử chỉ của Yori dõi theo người dùng khi gõ chữ hoặc thu âm**:
+   - Tách riêng cụm `.robot-eyes-gaze` để điều khiển hướng nhìn độc lập với hiệu ứng chớp mắt.
+   - **Khi gõ phím (`is-typing` / `is-watching`)**: Đầu Yori hơi cúi nhẹ về phía ô trả lời; đôi mắt nhìn xuống (`--eye-y: 3.5px`) và chuyển động quét ngang (`--eye-x`) theo vị trí con trỏ chữ của ứng viên theo thời gian thực.
+   - **Khi thu âm (`is-listening`)**: Đầu Yori nghiêng lắng nghe (`3.5deg`), mắt nhìn chăm chú và ăng-ten phát sáng nhịp nhàng.
+
+---
+
+### 2. Danh sách file đã cập nhật
+1. **`interview.html` & `interview-interrupt.html`**:
+   - Di chuyển `YORI` lên trên Robot.
+   - Thêm `.robot-eyes-gaze` và `.speech-bubble-tail`.
+2. **`css/styles.css`**:
+   - Style cho `.speech-bubble-tail`, bo tròn 18px cho `.question-speech-card`, và các trạng thái `.is-watching`, `.is-typing`, `.is-listening`, `.robot-eyes-gaze`.
+3. **`js/app.js`**:
+   - Triển khai `setRobotGaze()`, `resetRobotGaze()`, `updateGazeOnTyping()` bắt sự kiện `input`, `focus`, `blur`, `keyup`, `click` trên ô nhập câu trả lời `#answer` và đồng bộ khi thu âm.
+
+### 3. Trạng thái
+- **DONE** — Đã hoàn thành triển khai và kiểm tra tĩnh.
+
+---
+
+## [DONE] Tinh chỉnh Mũi nhọn Bong bóng thoại trỏ đúng miệng Yori, Thiết kế lại Avatar theo phong cách Yori & Bổ sung Cử chỉ Đưa tay lên tai Lắng nghe (`is-listening`)
+
+### 1. Phân tích 3 điểm cần cải thiện từ phản hồi của người dùng
+1. **Mũi nhọn bong bóng thoại (`.speech-bubble-tail`) hiện đang nằm hơi cao so với miệng của Yori**:
+   - **Nguyên nhân**: Hiện tại `.speech-bubble-tail` đang đặt cố định ở `top: 38px`. Trong khi đó, do nhãn tên `YORI` nằm ở đầu khung `.robot-stage-pod` (`~27px` tính cả khoảng cách), phần đầu và miệng của Yori (`cy="74"` trong SVG cao `138px`) thực tế nằm ở độ cao khoảng **`86px–95px`** tính từ đỉnh khung (tương đương khoảng `50%–52%` chiều cao khung). Vì vậy ở `top: 38px`, mũi nhọn đang trỏ vào vùng trán/ăng-ten chứ chưa trỏ vào miệng Yori.
+   - **Giải pháp**: Hạ vị trí `.speech-bubble-tail` xuống tầm ngang miệng của Yori (`top: 84px` / `top: 50%`) và tinh chỉnh góc vát của mũi nhọn hướng trực diện vào miệng Yori.
+2. **Thiết kế lại Avatar Logo theo thẩm mỹ của Yori để thay thế Avatar bóng người (Silhouette Avatar) & Icon đơn điệu**:
+   - **Hiện trạng**:
+     - File [`assets/avatar.svg`](file:///c:/Users/Mavc/Desktop/interview-poc/interview-poc/assets/avatar.svg) (dùng trên thanh Header của 10 trang và khung lớn ở trang `profile.html`) chỉ là một hình bóng người (silhouette) gồm 1 hình tròn và 1 hình chữ nhật bo góc màu xanh `#6AAEB8`, trông đơn điệu và chưa ăn nhập với nhân vật Yori mới.
+     - Ngoài ra, biểu tượng nhỏ `.tag-avatar` cạnh thanh sóng âm dưới câu hỏi (`interview.html`) đang dùng icon nét mảnh hình hộp chung chung.
+   - **Giải pháp**:
+     - Thiết kế lại [`assets/avatar.svg`](file:///c:/Users/Mavc/Desktop/interview-poc/interview-poc/assets/avatar.svg) thành **Yori Head Zoomed-in Avatar Logo** (chân dung cận cảnh phần đầu Yori phóng to chiếm trọn khung tròn giống các avatar logo chuẩn, thay vì vẽ cả thân người): khung tròn viền xanh ngọc chứa phần đầu Yori cận cảnh sắc nét (ăng-ten phát sáng, tai nghe hai bên, mặt kính visor `#203D43`, đôi mắt LED xanh ngọc `#92C7CF` to rõ có đốm sáng trắng, má hồng, nụ cười thân thiện và một phần nhỏ cổ áo ở rìa dưới).
+     - Đồng bộ luôn biểu tượng `.tag-avatar` bên dưới câu hỏi trong `interview.html` và `interview-interrupt.html` sang hình **Yori Avatar** thu nhỏ thay cho icon hình hộp nét mảnh cũ.
+3. **Hoạt ảnh lắng nghe (`is-listening`) còn khó nhận ra — Bổ sung cử chỉ Yori đưa tay lên tai để nghe**:
+   - **Hiện trạng**: Khi ứng viên bật Microphone thu âm (`.interviewer-stage.is-listening`), Yori mới chỉ nghiêng đầu nhẹ `3.5deg` tĩnh và nhìn xuống `3px`, không có chuyển động tay hay hiệu ứng sóng âm ở tai nên rất khó nhận biết.
+   - **Giải pháp**:
+     - **Cử chỉ đưa tay lên tai (`@keyframes robot-arm-listen`)**: Khi ở trạng thái `.is-listening`, cánh tay phải của Yori (`.robot-arm-right`) nâng cao lên sát chụp tai phải (`transform-origin: 131px 108px`, xoay `-142deg` đến `-150deg` kết hợp dịch chuyển nhẹ lên trên) tạo dáng **"khum tay lên tai lắng nghe"** rõ ràng và nhịp nhàng.
+     - **Nghiêng đầu & Sóng âm thu nhận ở tai (`.robot-ear-waves` + `@keyframes robot-head-listen`)**:
+       - Đầu Yori nghiêng rõ hơn (`5deg` ↔ `8deg`) hướng về phía người nói.
+       - Bổ sung các vòng cung sóng âm nhỏ (`.robot-ear-waves`) bên cạnh tai phải của Yori trong SVG: bình thường ẩn, khi `.is-listening` sẽ phát xung lan tỏa nối tiếp nhau, kết hợp đèn tai nghe và ăng-ten nhấp nháy sáng để người dùng nhìn thấy ngay lập tức Yori đang chăm chú nghe mình nói.
+
+---
+
+### 2. Danh sách file dự kiến cập nhật
+1. **[`assets/avatar.svg`](file:///c:/Users/Mavc/Desktop/interview-poc/interview-poc/assets/avatar.svg)**:
+   - Thay thế hình bóng silhouette đơn giản bằng vector **Yori Avatar Logo** sắc nét, chuẩn thẩm mỹ Yourin.
+2. **[`interview.html`](file:///c:/Users/Mavc/Desktop/interview-poc/interview-poc/interview.html) & [`interview-interrupt.html`](file:///c:/Users/Mavc/Desktop/interview-poc/interview-poc/interview-interrupt.html)**:
+   - Bổ sung cụm sóng âm ở tai `.robot-ear-waves` vào trong `.robot-head-group` của SVG Yori để hiển thị khi lắng nghe.
+   - Cập nhật `.tag-avatar` dưới câu hỏi sử dụng avatar Yori mới.
+3. **[`css/styles.css`](file:///c:/Users/Mavc/Desktop/interview-poc/interview-poc/css/styles.css)**:
+   - Điều chỉnh `.speech-bubble-tail` (`top: 84px`) để mũi nhọn trỏ thẳng vào miệng Yori.
+   - Bổ sung animation `.interviewer-stage.is-listening .robot-arm-right` (`@keyframes robot-arm-listen` đưa tay lên tai), `.interviewer-stage.is-listening .robot-head-group` (`@keyframes robot-head-listen`), và hiệu ứng sóng âm `.robot-ear-waves` (`@keyframes ear-wave-pulse`).
+
+### 3. Trạng thái
+- **DONE** — Đã hoàn thành triển khai và kiểm tra cấu trúc HTML/CSS/SVG.

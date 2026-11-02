@@ -1,10 +1,54 @@
 <svg width="498" height="498" viewBox="0 0 498 498" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M496.146 249.177C496.146 385.77 385.416 496.5 248.823 496.5C112.23 496.5 1.5 385.77 1.5 249.177C1.5 112.584 112.23 1.85364 248.823 1.85364C385.416 1.85364 496.146 112.584 496.146 249.177Z" stroke-width="3" stroke="#4F8F9B"/>
-<circle cx="251.88" cy="216.886" r="112.907" fill="#6AAEB8"/>
-<mask id="mask0_79_381" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="-3" width="498" height="498">
-<path d="M496.146 245.823C496.146 382.416 385.416 493.146 248.823 493.146C112.23 493.146 1.5 382.416 1.5 245.823C1.5 109.23 112.23 -1.5 248.823 -1.5C385.416 -1.5 496.146 109.23 496.146 245.823Z" fill="#FBF9F1" stroke-width="3" stroke="#4F8F9B"/>
-</mask>
-<g mask="url(#mask0_79_381)">
-<rect x="122.614" y="311.89" width="255.996" height="222.459" rx="27" fill="#6AAEB8"/>
-</g>
+  <defs>
+    <clipPath id="avatarCircle">
+      <circle cx="249" cy="249" r="244" />
+    </clipPath>
+    <radialGradient id="avatarBg" cx="50%" cy="38%" r="65%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="65%" stop-color="#EAF5F5"/>
+      <stop offset="100%" stop-color="#D4E9E8"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Circular Avatar Backdrop -->
+  <circle cx="249" cy="249" r="245" fill="url(#avatarBg)" stroke="#4F8F9B" stroke-width="6"/>
+
+  <g clip-path="url(#avatarCircle)">
+    <!-- Subtle Upper Collar / Shoulder Peek at Bottom Edge -->
+    <rect x="149" y="396" width="200" height="140" rx="70" fill="#FBF9F1" stroke="#4F8F9B" stroke-width="10"/>
+    <path d="M 205 436 Q 249 456 293 436" stroke="#92C7CF" stroke-width="8" stroke-linecap="round" fill="none"/>
+
+    <!-- Antenna (Zoomed-in at Top) -->
+    <line x1="249" y1="156" x2="249" y2="92" stroke="#4F8F9B" stroke-width="16" stroke-linecap="round"/>
+    <circle cx="249" cy="76" r="34" fill="#92C7CF" stroke="#4F8F9B" stroke-width="7"/>
+    <circle cx="239" cy="66" r="12" fill="#FBF9F1"/>
+
+    <!-- Ear Cups / Headphones -->
+    <rect x="38" y="218" width="46" height="106" rx="22" fill="#4F8F9B"/>
+    <circle cx="61" cy="271" r="11" fill="#92C7CF"/>
+    <rect x="414" y="218" width="46" height="106" rx="22" fill="#4F8F9B"/>
+    <circle cx="437" cy="271" r="11" fill="#92C7CF"/>
+
+    <!-- Zoomed-in Head Shell -->
+    <rect x="74" y="150" width="350" height="244" rx="90" fill="#FBF9F1" stroke="#4F8F9B" stroke-width="11"/>
+
+    <!-- Visor (Face Screen) -->
+    <rect x="108" y="184" width="282" height="176" rx="64" fill="#203D43"/>
+
+    <!-- Rosy Cheeks -->
+    <circle cx="144" cy="306" r="16" fill="#F4A5A5" opacity="0.75"/>
+    <circle cx="354" cy="306" r="16" fill="#F4A5A5" opacity="0.75"/>
+
+    <!-- Big Glowing Aqua Eyes -->
+    <ellipse cx="178" cy="254" rx="24" ry="30" fill="#92C7CF"/>
+    <circle cx="186" cy="242" r="9.5" fill="#FFFFFF"/>
+    <ellipse cx="320" cy="254" rx="24" ry="30" fill="#92C7CF"/>
+    <circle cx="328" cy="242" r="9.5" fill="#FFFFFF"/>
+
+    <!-- Friendly Smile -->
+    <path d="M 222 302 Q 249 326 276 302" stroke="#92C7CF" stroke-width="11" stroke-linecap="round" fill="none"/>
+  </g>
+
+  <!-- Outer Ring Stroke -->
+  <circle cx="249" cy="249" r="245" fill="none" stroke="#4F8F9B" stroke-width="6"/>
 </svg>

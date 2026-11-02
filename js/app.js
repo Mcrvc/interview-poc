@@ -715,8 +715,79 @@
     const exitModalName = $("#saved-name");
     const exitModalConfirmBtn = $("#exit-modal-confirm-btn");
 
+    const robotStage = $("#robot-stage");
+    const robotReplayBtn = $("#robot-replay-btn");
+    let mimeTimer = null;
+    let typingGazeTimer = null;
+
     let isRecording = false;
     let recordingTimer = null;
+
+    function setRobotGaze(x, y) {
+      if (!robotStage) return;
+      robotStage.style.setProperty("--eye-x", `${x}px`);
+      robotStage.style.setProperty("--eye-y", `${y}px`);
+    }
+
+    function resetRobotGaze() {
+      if (!robotStage) return;
+      setRobotGaze(0, 0);
+      robotStage.classList.remove("is-watching", "is-typing");
+    }
+
+    function updateGazeOnTyping() {
+      if (!robotStage || !answerInput) return;
+      if (robotStage.classList.contains("is-miming")) return;
+
+      robotStage.classList.remove("is-idle");
+      robotStage.classList.add("is-watching", "is-typing");
+
+      const text = answerInput.value;
+      const cursorPos = answerInput.selectionStart ?? text.length;
+      const totalLen = Math.max(1, text.length);
+      const ratio = Math.max(0, Math.min(1, cursorPos / totalLen));
+      const eyeX = (ratio - 0.5) * 6.4;
+      setRobotGaze(eyeX.toFixed(1), 3.5);
+
+      if (typingGazeTimer) clearTimeout(typingGazeTimer);
+      typingGazeTimer = setTimeout(() => {
+        if (!robotStage.classList.contains("is-miming") && !isRecording) {
+          robotStage.classList.remove("is-typing");
+          setRobotGaze(0, 2);
+        }
+      }, 1600);
+    }
+
+    function startRobotMime(customDuration) {
+      if (!robotStage) return;
+      if (mimeTimer) clearTimeout(mimeTimer);
+      if (typingGazeTimer) clearTimeout(typingGazeTimer);
+      resetRobotGaze();
+      robotStage.classList.remove("is-idle", "is-listening", "is-watching", "is-typing");
+      robotStage.classList.add("is-miming");
+
+      const qText = questions[currentStep] || "";
+      const duration = customDuration || Math.max(3000, Math.min(5500, qText.length * 40));
+
+      mimeTimer = setTimeout(() => {
+        stopRobotMime();
+      }, duration);
+    }
+
+    function stopRobotMime() {
+      if (mimeTimer) clearTimeout(mimeTimer);
+      if (!robotStage) return;
+      robotStage.classList.remove("is-miming");
+      if (!isRecording) {
+        robotStage.classList.add("is-idle");
+      }
+    }
+
+    if (robotReplayBtn) {
+      robotReplayBtn.addEventListener("click", () => {
+        startRobotMime();
+      });
+    }
 
     function updateCharCount() {
       if (!charCountEl || !answerInput) return;
@@ -756,6 +827,8 @@
       if (isRecording) {
         stopRecording();
       }
+
+      startRobotMime();
     }
 
     if (answerInput) {
@@ -763,7 +836,27 @@
         interview.answers[currentStep] = answerInput.value;
         save();
         updateCharCount();
+        updateGazeOnTyping();
       });
+
+      answerInput.addEventListener("focus", () => {
+        if (!robotStage.classList.contains("is-miming") && !isRecording) {
+          robotStage.classList.add("is-watching");
+          setRobotGaze(0, 3);
+        }
+      });
+
+      answerInput.addEventListener("blur", () => {
+        if (!isRecording) {
+          resetRobotGaze();
+          if (!robotStage.classList.contains("is-miming")) {
+            robotStage.classList.add("is-idle");
+          }
+        }
+      });
+
+      answerInput.addEventListener("keyup", updateGazeOnTyping);
+      answerInput.addEventListener("click", updateGazeOnTyping);
     }
 
     if (prevBtn) {
@@ -831,6 +924,13 @@
 
     function startRecording() {
       isRecording = true;
+      if (robotStage) {
+        if (mimeTimer) clearTimeout(mimeTimer);
+        if (typingGazeTimer) clearTimeout(typingGazeTimer);
+        robotStage.classList.remove("is-miming", "is-idle", "is-watching", "is-typing");
+        robotStage.classList.add("is-listening");
+        setRobotGaze(0, 3.5);
+      }
       if (micToggleBtn) micToggleBtn.classList.add("is-recording");
       if (micLabel) micLabel.textContent = "Recording... (Click to stop)";
       if (micSub) micSub.textContent = "Listening to your voice...";
@@ -855,6 +955,11 @@
     function stopRecording() {
       isRecording = false;
       if (recordingTimer) clearTimeout(recordingTimer);
+      if (robotStage) {
+        robotStage.classList.remove("is-listening");
+        resetRobotGaze();
+        robotStage.classList.add("is-idle");
+      }
       if (micToggleBtn) micToggleBtn.classList.remove("is-recording");
       if (micLabel) micLabel.textContent = "Record Answer with Microphone";
       if (micSub) micSub.textContent = "Click to start speech-to-text";

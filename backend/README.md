@@ -1,36 +1,47 @@
-# AI Virtual Assistant — Authentication Module
+# Yourin — AI Virtual Interview Assistant
 
-A small authentication module developed as part of an AI Virtual Assistant course project. It provides account registration, login, session validation, and logout through a FastAPI backend backed by PostgreSQL.
+Yourin is an AI-powered virtual interview assistant developed as part of a course project. The application aims to support users in preparing for job interviews through CV management, job profile configuration, interview simulations, and AI-assisted feedback.
 
-The existing frontend is a proof of concept (PoC). The authentication endpoints connect to the backend, while other application workflows may still use local demo data.
+This repository contains a proof-of-concept (PoC) implementation consisting of a web-based frontend and a FastAPI backend.
+
+Authentication is managed by **Supabase Auth**, while FastAPI provides the backend infrastructure for application-specific functionality. Some application workflows remain locally implemented using demo data.
+
+---
 
 ## Table of Contents
 
 - [Technology Stack](#technology-stack)
 - [Project Structure](#project-structure)
 - [Requirements](#requirements)
-- [Database Setup](#database-setup)
-- [Backend Configuration](#backend-configuration)
-- [Database Migrations](#database-migrations)
-- [Running the Backend](#running-the-backend)
-- [Running the Frontend](#running-the-frontend)
-- [Testing the API](#testing-the-api)
-- [Authentication Workflow](#authentication-workflow)
+- [Backend Setup](#backend-setup)
+- [Frontend Setup](#frontend-setup)
+- [Running the Application](#running-the-application)
+- [API Documentation](#api-documentation)
+- [Authentication Architecture](#authentication-architecture)
+- [Development Tools](#development-tools)
 - [Troubleshooting](#troubleshooting)
 - [Security Notes](#security-notes)
+
+---
 
 ## Technology Stack
 
 | Component | Technology |
 |---|---|
+| Frontend | HTML, CSS, JavaScript |
 | Backend framework | FastAPI |
 | Programming language | Python |
-| Database | PostgreSQL |
-| ORM | SQLAlchemy |
+| Authentication | Supabase Auth |
+| Database | Supabase PostgreSQL |
+| Database access | Supabase Client |
+| ORM (backend infrastructure) | SQLAlchemy |
 | Database migrations | Alembic |
-| Password hashing | Argon2id |
-| Authentication | Session-based authentication using an HTTP-only cookie |
-| Frontend | HTML, CSS, JavaScript |
+| API server | Uvicorn |
+| Code quality | Ruff |
+| Testing | pytest |
+| Version control | Git and GitHub |
+
+---
 
 ## Project Structure
 
@@ -38,292 +49,137 @@ The existing frontend is a proof of concept (PoC). The authentication endpoints 
 poc/
 ├── backend/
 │   ├── app/
-│   │   ├── api/
-│   │   │   └── auth.py
-│   │   ├── core/
-│   │   │   ├── security.py
-│   │   │   └── session.py
 │   │   ├── db/
 │   │   │   └── session.py
-│   │   ├── models/
-│   │   │   ├── user.py
-│   │   │   └── session.py
-│   │   ├── schemas/
-│   │   │   └── auth.py
-│   │   ├── alembic/
-│   │   ├── main.py
-│   │   └── ...
-│   └── ...
+│   │   └── main.py
+│   ├── migrations/
+│   ├── alembic.ini
+│   ├── requirements.txt
+│   ├── README.md
+│   └── test_db.py
+│
 ├── frontend/
 │   ├── sign-in.html
 │   ├── sign-up.html
 │   ├── dashboard.html
+│   ├── profile.html
 │   ├── js/
 │   │   ├── api.js
-│   │   └── app.js
-│   └── ...
+│   │   ├── app.js
+│   │   └── data.js
+│   └── css/
+│       └── styles.css
+│
 ├── .gitignore
 └── README.md
 ```
 
+---
+
 ## Requirements
 
-The following instructions target Linux distributions such as Arch Linux, Ubuntu, and Debian.
+The following instructions primarily target Linux distributions such as Arch Linux, Ubuntu, and Debian.
 
-Install the required tools using the package manager available on your system.
+Required software:
+
+- Python 3.12 or later
+- pip
+- Git
+- Node.js (if required by additional frontend development tools)
+- A Supabase project
 
 ### Arch Linux
 
 ```bash
-sudo pacman -S python python-pip postgresql nodejs
+sudo pacman -S python python-pip git nodejs npm
 ```
 
 ### Ubuntu / Debian
 
 ```bash
 sudo apt update
-sudo apt install python3 python3-venv python3-pip postgresql postgresql-client nodejs npm
+sudo apt install python3 python3-venv python3-pip git nodejs npm
 ```
 
-You will also need Git if you are cloning the project.
+---
 
-## Database Setup
+## Backend Setup
 
-The application uses PostgreSQL to store user accounts and authentication sessions.
-
-### 1. Start PostgreSQL
-
-#### Arch Linux
-
-Initialize the PostgreSQL data directory if this is a fresh installation:
-
-```bash
-sudo -iu postgres initdb --locale=C.UTF-8 --encoding=UTF8 -D /var/lib/postgres/data
-```
-
-Enable and start PostgreSQL:
-
-```bash
-sudo systemctl enable --now postgresql
-```
-
-If PostgreSQL has already been initialized, do not run `initdb` again.
-
-#### Ubuntu / Debian
-
-```bash
-sudo systemctl enable --now postgresql
-```
-
-Check that PostgreSQL is running:
-
-```bash
-systemctl status postgresql
-```
-
-### 2. Create the database and database user
-
-Open the PostgreSQL shell as the PostgreSQL administrator:
-
-```bash
-sudo -iu postgres psql
-```
-
-Create a dedicated database user and database:
-
-```sql
-CREATE USER assistant_user WITH PASSWORD 'replace_with_a_strong_password';
-
-CREATE DATABASE assistant_db OWNER assistant_user;
-```
-
-Exit the PostgreSQL shell:
-
-```sql
-\q
-```
-
-The application database is now:
-
-- **Database name:** `assistant_db`
-- **Database user:** `assistant_user`
-
-Replace the example password with a strong local development password.
-
-### 3. Verify the database connection
-
-Run:
-
-```bash
-psql -h 127.0.0.1 -U assistant_user -d assistant_db
-```
-
-Enter the password when prompted.
-
-If the connection succeeds, exit:
-
-```sql
-\q
-```
-
-## Backend Configuration
-
-Navigate to the backend directory:
+### 1. Navigate to the backend directory
 
 ```bash
 cd backend
 ```
 
-### 1. Create a Python virtual environment
+### 2. Create a virtual environment
 
 ```bash
 python -m venv .venv
 ```
 
-Activate it:
+### 3. Activate the virtual environment
 
 ```bash
 source .venv/bin/activate
 ```
 
-### 2. Install Python dependencies
-
-Install the project's dependencies using its requirements file, if present:
+### 4. Install dependencies
 
 ```bash
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-If the project uses a different dependency file or package manager, follow the corresponding project configuration.
-
-### 3. Configure the database connection
-
-The backend must be configured to connect to the PostgreSQL database created above.
-
-A typical SQLAlchemy PostgreSQL connection URL has the following format:
-
-```text
-postgresql+psycopg://assistant_user:YOUR_PASSWORD@127.0.0.1:5432/assistant_db
-```
-
-Use the database configuration expected by the project, such as its `.env` file or application settings.
-
-**Important:** The actual environment variable name must match the one read by `backend/app/db/session.py` and the Alembic configuration. Do not commit database passwords or other secrets to Git.
-
-## Database Migrations
-
-The project uses Alembic to create and update database tables.
-
-Ensure that the virtual environment is activated and that you are in the backend directory:
-
-```bash
-cd backend
-source .venv/bin/activate
-```
-
-Apply all migrations:
-
-```bash
-alembic upgrade head
-```
-
-This should create the database tables required by the application, including:
-
-- `users`
-- `sessions`
-- `alembic_version`
-
-To inspect the current migration revision:
-
-```bash
-alembic current
-```
-
-To inspect the migration history:
-
-```bash
-alembic history
-```
-
-To verify the tables in PostgreSQL:
-
-```bash
-psql -h 127.0.0.1 -U assistant_user -d assistant_db
-```
-
-Then run:
-
-```sql
-\dt
-```
-
-Exit with:
-
-```sql
-\q
-```
-
-## Running the Backend
-
-From the `backend/` directory, activate the virtual environment:
-
-```bash
-source .venv/bin/activate
-```
-
-Start the FastAPI development server:
+### 5. Run the FastAPI development server
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-The backend should be available at:
+The backend will be available at:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-The root endpoint can be used to verify that the server is running:
+To stop the server, press `Ctrl + C`.
 
-```text
-http://127.0.0.1:8000/
+To deactivate the virtual environment:
+
+```bash
+deactivate
 ```
 
-Expected response:
+---
 
-```json
-{
-  "message": "Authentication API is running"
-}
+## Frontend Setup
+
+The frontend is implemented using HTML, CSS, and JavaScript.
+
+### 1. Configure Supabase
+
+The frontend communicates directly with Supabase Auth through the Supabase JavaScript client.
+
+Configure the following values in `frontend/js/api.js`:
+
+```javascript
+const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
+const SUPABASE_PUBLISHABLE_KEY = "YOUR_SUPABASE_PUBLISHABLE_KEY";
 ```
 
-The health endpoint is:
+Use the project's Supabase URL and publishable key.
 
-```text
-http://127.0.0.1:8000/health
-```
+Do not place a Supabase secret key or `service_role` key in frontend code.
 
-Expected response:
+### 2. Start the frontend development server
 
-```json
-{
-  "status": "healthy"
-}
-```
-
-Keep this terminal open while testing the application.
-
-## Running the Frontend
-
-Open a **second terminal**.
-
-Navigate to the project root directory:
+Open another terminal at the project root:
 
 ```bash
 cd poc
 ```
 
-Start the local frontend server:
+Start a local HTTP server:
 
 ```bash
 python -m http.server 5500 --directory frontend
@@ -335,229 +191,279 @@ The frontend will be available at:
 http://127.0.0.1:5500
 ```
 
-Open the sign-up page:
+### 3. Access the application
+
+Sign-up page:
 
 ```text
 http://127.0.0.1:5500/sign-up.html
 ```
 
-Open the sign-in page:
+Sign-in page:
 
 ```text
 http://127.0.0.1:5500/sign-in.html
 ```
 
-The frontend API helper sends requests to the backend at:
+Dashboard:
 
 ```text
-http://127.0.0.1:8000
+http://127.0.0.1:5500/dashboard.html
 ```
 
-The frontend should be accessed through the local HTTP server rather than by opening the HTML files directly with a `file://` URL.
+The frontend should be accessed through the local HTTP server rather than opening HTML files directly using a `file://` URL.
 
-## Testing the API
+---
 
-FastAPI automatically provides interactive API documentation through Swagger UI.
+## Running the Application
 
-### 1. Open the API documentation
+The frontend and backend must run in separate terminals.
 
-Start the backend, then open:
+### Terminal 1: Backend
+
+```bash
+cd backend
+source .venv/bin/activate
+uvicorn app.main:app --reload
+```
+
+### Terminal 2: Frontend
+
+```bash
+cd poc
+python -m http.server 5500 --directory frontend
+```
+
+The application can then be accessed through:
+
+```text
+http://127.0.0.1:5500
+```
+
+---
+
+## API Documentation
+
+FastAPI automatically generates interactive API documentation through Swagger UI.
+
+Open:
 
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-This page allows you to inspect the API endpoints, submit requests, and view responses.
+### Available Endpoints
 
-The authentication API currently provides the following endpoints:
-
-| Method | Endpoint | Purpose |
+| Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/auth/signup` | Register a new account |
-| `POST` | `/api/auth/login` | Authenticate and create a session |
-| `GET` | `/api/auth/me` | Return the currently authenticated user |
-| `POST` | `/api/auth/logout` | End the current session |
-| `GET` | `/` | Check whether the API is running |
-| `GET` | `/health` | Health check |
+| GET | `/` | Returns the API status |
+| GET | `/health` | Checks backend availability |
 
-### 2. Test account registration
+### Example: Root Endpoint
 
-In Swagger UI:
+Request:
 
-1. Find `POST /api/auth/signup`.
-2. Expand the endpoint.
-3. Click **Try it out**.
-4. Enter a new username and password in the request body.
-5. Click **Execute**.
+```http
+GET /
+```
 
-Example request:
+Expected response:
 
 ```json
 {
-  "username": "test_user",
-  "password": "TestPassword123!"
+  "message": "Yourin API is running"
 }
 ```
 
-Expected result:
+### Example: Health Check
 
-- HTTP status: `201 Created`
-- The response contains the registered user's information.
-- The password should not be returned in the response.
+Request:
 
-Try registering the same username again.
+```http
+GET /health
+```
 
-Expected result:
-
-- The API rejects the duplicate account.
-- The response contains an appropriate error message.
-
-### 3. Test login
-
-Find `POST /api/auth/login`.
-
-Click **Try it out** and submit the credentials for the account you registered.
-
-Example request:
+Expected response:
 
 ```json
 {
-  "username": "test_user",
-  "password": "TestPassword123!"
+  "status": "healthy"
 }
 ```
 
-Expected result:
+---
 
-- HTTP status: `200 OK`
-- The response contains user information.
-- The server sets a session cookie named `session`.
+## Authentication Architecture
 
-The session cookie is used to authenticate subsequent requests.
+Yourin uses Supabase Auth as its authentication provider.
 
-### 4. Test the current-user endpoint
+Authentication responsibilities are separated from the FastAPI backend.
 
-Find `GET /api/auth/me`.
+### Supabase Auth
 
-Click **Try it out**, then click **Execute**.
+Supabase manages:
 
-Expected result:
+- User registration.
+- User login.
+- Password management.
+- Authentication sessions.
+- User identity.
 
-- If the login session is valid, the endpoint returns the authenticated user's information.
-- If no valid session is present, the endpoint should reject the request with an authentication error.
+### Supabase Database
 
-**Note:** Swagger UI may not automatically retain or send the session cookie for every configuration. If the endpoint returns an authentication error after a successful login, verify the cookie in the browser's developer tools or test the endpoints using the frontend or `curl`.
+The planned `public.accounts` table stores application-specific account information associated with Supabase Auth users.
 
-### 5. Test logout
+The table is intended to contain:
 
-Find `POST /api/auth/logout`.
+| Column | Description |
+|---|---|
+| `id` | References the corresponding Supabase Auth user ID |
+| `username` | Unique application username |
+| `created_at` | Account creation timestamp |
+| `updated_at` | Last modification timestamp |
 
-Click **Try it out**, then click **Execute**.
+### FastAPI
 
-Expected result:
+FastAPI provides the backend infrastructure for application-specific API functionality.
 
-- The server invalidates the current session.
-- The session cookie is cleared.
-- The response indicates that logout succeeded.
+It does not maintain an independent password database or authentication session system.
 
-Call `GET /api/auth/me` again.
+### Authentication Workflow
 
-Expected result:
+1. A user submits registration information through the frontend.
+2. The frontend communicates with Supabase Auth.
+3. Supabase creates the authenticated user.
+4. The user signs in through Supabase Auth.
+5. Supabase manages the user's authentication session.
+6. The frontend accesses protected application pages according to authentication state.
 
-- The previous session is no longer valid.
-- The API rejects the request as unauthenticated.
+---
 
-## Authentication Workflow
+## Development Tools
 
-The authentication flow works as follows:
+### Ruff
 
-1. A user registers with a username and password.
-2. The backend hashes the password using Argon2id and stores the resulting hash in PostgreSQL.
-3. The user submits their credentials to the login endpoint.
-4. The backend verifies the password.
-5. The backend creates a session and stores a hash of the session token in the database.
-6. The raw session token is sent to the browser in an HTTP-only cookie.
-7. Subsequent authenticated requests include the session cookie.
-8. The backend validates the session and identifies the authenticated user.
-9. When the user logs out, the session is invalidated.
+Ruff is used for Python linting and code formatting.
+
+Install:
+
+```bash
+pip install ruff
+```
+
+Check code quality:
+
+```bash
+ruff check .
+```
+
+Automatically fix supported issues:
+
+```bash
+ruff check . --fix
+```
+
+Format Python files:
+
+```bash
+ruff format .
+```
+
+### pytest
+
+pytest is used for automated Python testing.
+
+Install:
+
+```bash
+pip install pytest
+```
+
+Run tests:
+
+```bash
+pytest
+```
+
+Run tests with more detailed output:
+
+```bash
+pytest -v
+```
+
+### Secret Scanning
+
+Use Gitleaks to detect accidentally committed credentials, API keys, and other sensitive information.
+
+Install Gitleaks using the official installation instructions:
+
+https://github.com/gitleaks/gitleaks
+
+Scan the repository:
+
+```bash
+gitleaks git .
+```
+
+You can also configure GitHub Secret Scanning and Push Protection in your repository settings if these features are available for your repository.
+
+---
 
 ## Troubleshooting
 
-### PostgreSQL is not running
+### FastAPI cannot start
 
-Check its status:
+Ensure that:
 
-```bash
-systemctl status postgresql
-```
+- The virtual environment is activated.
+- Dependencies are installed.
+- The terminal is running from the `backend/` directory.
+- The application entry point is `app.main:app`.
 
-Start it:
-
-```bash
-sudo systemctl start postgresql
-```
-
-### Database connection failed
-
-Verify:
-
-- PostgreSQL is running.
-- The database exists.
-- The database user and password are correct.
-- The connection URL points to the correct host, port, and database.
-
-Test the connection manually:
+Run:
 
 ```bash
-psql -h 127.0.0.1 -U assistant_user -d assistant_db
+uvicorn app.main:app --reload
 ```
 
-### Database tables are missing
-
-Apply the migrations:
-
-```bash
-cd backend
-source .venv/bin/activate
-alembic upgrade head
-```
-
-### Frontend cannot connect to the backend
+### Frontend cannot connect to FastAPI
 
 Verify that:
 
-- The backend is running at `http://127.0.0.1:8000`.
+- FastAPI is running at `http://127.0.0.1:8000`.
 - The frontend is running at `http://127.0.0.1:5500`.
 - The backend CORS configuration allows the frontend origin.
-- The frontend API helper uses `credentials: "include"`.
 
-### Browser reports a CORS error
+### Supabase authentication fails
 
-The backend must explicitly allow the frontend origin and credentials.
+Verify that:
 
-For local development, the CORS configuration should include:
+- The Supabase project is active.
+- The Project URL is correct.
+- The publishable key is correct.
+- Supabase Auth allows new user registration.
+- Email confirmation settings are compatible with the application's username-based authentication approach.
 
-```python
-allow_origins=[
-    "http://127.0.0.1:5500",
-    "http://localhost:5500",
-],
-allow_credentials=True,
+### Python dependencies are missing
+
+Activate the virtual environment and reinstall dependencies:
+
+```bash
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-Do not use wildcard origins when credentialed requests are required.
-
-### Login succeeds, but the dashboard does not load correctly
-
-The current frontend includes proof-of-concept workflows that may still rely on local demo state. A successful backend login does not necessarily mean every page is already connected to the backend or protected by the session.
+---
 
 ## Security Notes
 
-- Passwords are hashed using Argon2id before being stored.
-- Raw session tokens should not be stored in the database.
-- Session cookies are configured as HTTP-only.
-- The current development configuration uses local HTTP and is not intended for production deployment.
-- Do not commit database credentials, session secrets, or other sensitive configuration to Git.
-- Use HTTPS and secure cookie settings when deploying outside local development.
-- Authentication should be enforced by the backend, not only by frontend page redirects.
-- This project is a course proof of concept and should not be treated as production-ready without additional security review.
+- Supabase Auth is responsible for password management and authentication sessions.
+- Never store plaintext passwords in the application database or browser storage.
+- Supabase publishable keys are designed for frontend use.
+- Never expose Supabase secret keys or legacy `service_role` keys in frontend code.
+- Enable Row Level Security (RLS) on tables containing user-specific information.
+- Never commit database credentials, private API keys, or environment files containing secrets.
+- Use HTTPS in production deployments.
+- Backend endpoints that access protected resources must independently validate Supabase access tokens.
+- Frontend authentication checks alone are insufficient to secure backend resources.
+- This project is a proof of concept and requires further security review before production deployment.

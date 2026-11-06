@@ -16,19 +16,38 @@
     });
   }
 
-  // Initialize Supabase.
+  // Initialize Supabase and the authentication API.
   try {
     if (!window.supabase?.createClient) {
-      await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2");
+      await loadScript(
+        "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+      );
     }
 
-    if (!window.YourinAPI) {
+    if (!window.YourinConfigPromise) {
+      await loadScript("js/config.js");
+    }
+
+    if (!window.YourinAPIReady) {
       await loadScript("js/api.js");
     }
+
+    // Wait until Supabase configuration and authentication
+    // functions have finished initializing.
+    await window.YourinAPIReady;
+
+    if (!window.YourinAPI) {
+      throw new Error(
+        "Authentication API initialization was unsuccessful."
+      );
+    }
+
   } catch (err) {
     console.error("Authentication initialization failed:", err);
+
     document.body.textContent =
       "Unable to initialize authentication. Please refresh the page.";
+
     return;
   }
 
@@ -36,13 +55,16 @@
   let authenticatedUser = null;
 
   try {
-    authenticatedUser = await window.YourinAPI.getCurrentUser();
+    authenticatedUser =
+      await window.YourinAPI.getCurrentUser();
+
   } catch (err) {
     console.error("Session verification failed:", err);
 
     if (!PUBLIC_PAGES.includes(page)) {
       document.body.textContent =
         "Unable to verify your session. Please refresh the page.";
+
       return;
     }
   }
@@ -650,7 +672,7 @@
 
         try {
           // This method must be implemented in api.js.
-          await window.YourinAPI.updateCredentials({
+          await window.YourinAPI.updateAccount({
             username: newUsername,
             password: newPassword || undefined
           });

@@ -4,36 +4,33 @@
    User database integration will be added later.
    ========================================= */
 
-(() => {
+window.YourinAPIReady = (async () => {
     "use strict";
 
     // =========================================
     // 1. SUPABASE CONFIGURATION
     // =========================================
 
-    const SUPABASE_URL = "https://qutiahnegjzgbxjopsqe.supabase.co";
-
-    const SUPABASE_ANON_KEY =
-        "sb_publishable_3CaHUdWGntAdBjsyxxVE0g_rFt9oWz7";
-
-    if (!window.supabase) {
+    if (!window.YourinConfigPromise) {
         throw new Error(
-            "Supabase SDK is not loaded. Load Supabase JS before api.js."
+            "Supabase configuration promise is unavailable."
         );
     }
 
-    const supabaseClient = window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_ANON_KEY,
-        {
-            auth: {
-                autoRefreshToken: true,
-                persistSession: true,
-                detectSessionInUrl: true
-            }
-        }
-    );
+    const config = await window.YourinConfigPromise;
 
+    if (!config?.supabaseUrl || !config?.supabasePublishableKey) {
+        throw new Error("Supabase configuration is missing.");
+    }
+
+    if (!window.supabase) {
+        throw new Error("Supabase JavaScript library is unavailable.");
+    }
+
+    const supabaseClient = window.supabase.createClient(
+        config.supabaseUrl,
+        config.supabasePublishableKey
+    );
 
     // =========================================
     // 2. VALIDATION AND HELPERS
@@ -89,7 +86,6 @@
         );
     }
 
-
     // =========================================
     // 3. SIGN UP
     // =========================================
@@ -132,7 +128,6 @@
         }
     }
 
-
     // =========================================
     // 4. SIGN IN
     // =========================================
@@ -168,7 +163,6 @@
         }
     }
 
-
     // =========================================
     // 5. SIGN OUT
     // =========================================
@@ -185,7 +179,6 @@
         };
     }
 
-
     // =========================================
     // 6. GET CURRENT SESSION
     // =========================================
@@ -200,7 +193,6 @@
 
         return data.session;
     }
-
 
     // =========================================
     // 7. GET CURRENT USER
@@ -221,7 +213,6 @@
         return data.user;
     }
 
-
     // =========================================
     // 8. CHECK AUTHENTICATION
     // =========================================
@@ -231,7 +222,6 @@
 
         return Boolean(user);
     }
-
 
     // =========================================
     // 9. UNLOCK EDITING
@@ -282,7 +272,6 @@
             user: data.user
         };
     }
-
 
     // =========================================
     // 10. UPDATE ACCOUNT
@@ -341,7 +330,6 @@
         };
     }
 
-
     // =========================================
     // 11. AUTH STATE LISTENER
     // =========================================
@@ -361,7 +349,6 @@
         return data.subscription;
     }
 
-
     // =========================================
     // 12. PUBLIC API
     // =========================================
@@ -378,4 +365,13 @@
         onAuthStateChange
     };
 
-})();
+    return window.YourinAPI;
+
+})().catch((error) => {
+    console.error(
+        "Yourin authentication API initialization failed:",
+        error
+    );
+
+    throw error;
+});
